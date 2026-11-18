@@ -1,0 +1,105 @@
+<GraceChangePlan graceVersion="4.0" status="applied">
+  <C-KEITARO-TOOL-BOOTSTRAP-20261118>
+    <IntentSummary>Create all modules of the initial tool and register them in graph and verification.</IntentSummary>
+    <BaselineAssertions>
+      <MustExist><Value>.grace/context/requirements.xml</Value></MustExist>
+      <MustExist><Value>.grace/changes/active/C-KEITARO-TOOL-BOOTSTRAP-20261118/spec.xml</Value></MustExist>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustVerify><Module>M-CAMPAIGN-CREATOR</Module></MustVerify>
+      <MustVerify><Module>M-OFFER-EDITOR</Module></MustVerify>
+      <MustVerify><Module>M-API-CONTRACT</Module></MustVerify>
+      <MustPassCommand><Command>make gate-backend</Command></MustPassCommand>
+      <MustPassCommand><Command>make gate-frontend</Command></MustPassCommand>
+      <MustPassCommand><Command>make gate-openapi</Command></MustPassCommand>
+      <MustPassCommand><Command>make gate-compose</Command></MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-BACKEND-CORE />
+        <M-DB />
+        <M-KEITARO-CLIENT />
+        <M-CAMPAIGN-CREATOR />
+        <M-OFFER-EDITOR />
+        <M-BACKEND-API />
+        <M-API-CONTRACT />
+        <M-FRONTEND-SHARED />
+        <M-FRONTEND-ENTITIES />
+        <M-FRONTEND-FEATURES />
+        <M-FRONTEND-WIDGETS />
+        <M-FRONTEND-PAGES />
+        <M-FRONTEND-APP />
+        <M-INFRA />
+        <DF-CREATE-CAMPAIGN />
+        <DF-EDIT-OFFERS />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-BACKEND-CORE />
+        <V-M-DB />
+        <V-M-KEITARO-CLIENT />
+        <V-M-CAMPAIGN-CREATOR />
+        <V-M-OFFER-EDITOR />
+        <V-M-BACKEND-API />
+        <V-M-API-CONTRACT />
+        <V-M-FRONTEND-SHARED />
+        <V-M-FRONTEND-ENTITIES />
+        <V-M-FRONTEND-FEATURES />
+        <V-M-FRONTEND-WIDGETS />
+        <V-M-FRONTEND-PAGES />
+        <V-M-FRONTEND-APP />
+        <V-M-INFRA />
+      </VerificationAnchors>
+      <ContextArtifact>requirements.xml</ContextArtifact>
+      <ContextArtifact>technology.xml</ContextArtifact>
+      <ContextArtifact>principles.xml</ContextArtifact>
+      <ContextArtifact>deployment.xml</ContextArtifact>
+      <ContextArtifact>ux-guidelines.xml</ContextArtifact>
+    </DurableScope>
+    <ObservedWriteScope>
+      <Glob>apps/**</Glob>
+      <Glob>contracts/**</Glob>
+      <Glob>.grace/**</Glob>
+      <Glob>.claude/**</Glob>
+      <File>docker-compose.yml</File>
+      <File>Makefile</File>
+      <File>README.md</File>
+      <File>AGENTS.md</File>
+      <File>CLAUDE.md</File>
+      <File>.gitignore</File>
+      <File>.grace-lint.json</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Backend: core, DB + Alembic, Keitaro client, creator and editor services, routes, OpenAPI export.</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria><Criterion>make gate-backend and make gate-openapi exit 0; live creator/editor scenarios of V-M-CAMPAIGN-CREATOR and V-M-OFFER-EDITOR observed.</Criterion></AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+          <Command>make gate-backend</Command>
+          <Command>make gate-openapi</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Frontend on FSD consuming generated API types.</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria><Criterion>make gate-frontend exits 0 (oxlint, steiger, tsc, vite build); creator and editor work in the browser.</Criterion></AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+          <Command>make gate-frontend</Command>
+        </Verification>
+      </T-002>
+      <T-003>
+        <Title>Infra, GRACE artifacts, AGENTS.md / CLAUDE.md, README.</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria><Criterion>make gate-compose exits 0; grace lint reports 0 errors.</Criterion></AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+          <Command>make gate-compose</Command>
+        </Verification>
+      </T-003>
+    </ImplementationPlan>
+  </C-KEITARO-TOOL-BOOTSTRAP-20261118>
+</GraceChangePlan>

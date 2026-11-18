@@ -1,0 +1,23 @@
+<GraceVerificationIndex graceVersion="4.0">
+  <VerificationDocuments>
+    <VD-MAIN>
+      <Path>verification/main.xml</Path>
+      <Owns>
+        <V-M-BACKEND-CORE />
+        <V-M-DB />
+        <V-M-KEITARO-CLIENT />
+        <V-M-CAMPAIGN-CREATOR />
+        <V-M-OFFER-EDITOR />
+        <V-M-BACKEND-API />
+        <V-M-API-CONTRACT />
+        <V-M-FRONTEND-SHARED />
+        <V-M-FRONTEND-ENTITIES />
+        <V-M-FRONTEND-FEATURES />
+        <V-M-FRONTEND-WIDGETS />
+        <V-M-FRONTEND-PAGES />
+        <V-M-FRONTEND-APP />
+        <V-M-INFRA />
+      </Owns>
+    </VD-MAIN>
+  </VerificationDocuments>
+</GraceVerificationIndex>

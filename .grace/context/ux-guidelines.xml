@@ -1,0 +1,6 @@
+<GraceUXGuidelines graceVersion="4.0">
+  <Applicability>applicable</Applicability>
+  <Audience>Media buyers working in Keitaro.</Audience>
+  <Guideline>Russian UI copy; shadcn/ui components; destructive actions (remove offer) require an in-app confirmation dialog; every mutation reports success or the backend error via toast.</Guideline>
+  <Guideline>Numbers must match Keitaro: shares shown as integers with the active sum in the stream footer, stats with ru-RU formatting.</Guideline>
+</GraceUXGuidelines>

@@ -1,0 +1,49 @@
+<GraceChangeSpec graceVersion="4.0" status="applied">
+  <C-KEITARO-TOOL-BOOTSTRAP-20261118>
+    <Summary>Bootstrap the Keitaro campaign tool: FastAPI + SQLAlchemy backend, React FSD frontend, docker compose, GRACE governance.</Summary>
+    <Problem>The Adrobot test assignment needs a campaign creator (name + geo + offer -> campaign with domain, group, source and two streams) and an offer editor for existing campaigns (add/remove offers with correct shares and stats), delivered as a repository with migrations and run instructions.</Problem>
+    <Goals>
+      <Goal>POST /api/campaigns creates a Keitaro campaign with stream 1 (forced, country accept filter, redirect to Google) and stream 2 (regular, landings schema, chosen offer at 100%), with domain, group and traffic source set.</Goal>
+      <Goal>Editor endpoints list streams with offers, shares and per-offer stats; add/remove rebalance active shares equally; manual shares must sum to 100.</Goal>
+      <Goal>PostgreSQL stores created campaigns and an offer change log, managed by Alembic.</Goal>
+      <Goal>React + Vite + TanStack Query + Tailwind + shadcn/ui frontend on Feature-Sliced Design using types generated from contracts/openapi.json.</Goal>
+      <Goal>CLAUDE.md / AGENTS.md rules: no tests, API contract changes only through GRACE bundles, small UI changes may be direct fixes.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Tests are banned; evidence is make gate-backend, gate-frontend, gate-openapi, gate-compose and grace lint.</Constraint>
+      <Constraint>Keitaro API key stays in apps/backend/.env (gitignored).</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>No authentication of tool users, no landing management, no editing of non-offer stream settings.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>A campaign created through the UI appears in Keitaro with the two streams described above and its URL is shown.</Criterion>
+      <Criterion>In the editor, adding offers gives 100 -> 50/50 -> 34/33/33, removing rebalances, manual shares not summing to 100 are rejected, and every change is logged.</Criterion>
+      <Criterion>All make gate-* targets and grace lint exit 0.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-BACKEND-CORE />
+      <M-DB />
+      <M-KEITARO-CLIENT />
+      <M-CAMPAIGN-CREATOR />
+      <M-OFFER-EDITOR />
+      <M-BACKEND-API />
+      <M-API-CONTRACT />
+      <M-FRONTEND-SHARED />
+      <M-FRONTEND-ENTITIES />
+      <M-FRONTEND-FEATURES />
+      <M-FRONTEND-WIDGETS />
+      <M-FRONTEND-PAGES />
+      <M-FRONTEND-APP />
+      <M-INFRA />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>make gate</ExpectedCommand>
+      <ExpectedEvidence>Fresh gate output, grace lint with 0 errors, live creator/editor run against the configured Keitaro tracker.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>The reference editor video was not available to the implementer; the equal-rebalance share rule is recorded in requirements.xml Decisions and can be changed through a new change bundle.</Assumption>
+      <Assumption>User approval: the user requested this bootstrap in chat on 2026-11-18 and asked to start immediately.</Assumption>
+    </Assumptions>
+  </C-KEITARO-TOOL-BOOTSTRAP-20261118>
+</GraceChangeSpec>

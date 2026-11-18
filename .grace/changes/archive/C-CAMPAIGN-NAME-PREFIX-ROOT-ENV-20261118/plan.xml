@@ -1,0 +1,80 @@
+<GraceChangePlan graceVersion="4.0" status="applied">
+  <C-CAMPAIGN-NAME-PREFIX-ROOT-ENV-20261118>
+    <IntentSummary>Add CAMPAIGN_NAME_PREFIX to settings, creator and CreatorDefaults contract; show it in the form; move env files to root.</IntentSummary>
+    <BaselineAssertions>
+      <MustExist><Value>M-CAMPAIGN-CREATOR</Value></MustExist>
+      <MustExist><Value>apps/backend/app/services/campaign_creator.py</Value></MustExist>
+      <MustExist><Value>contracts/openapi.json</Value></MustExist>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustVerify><Module>M-CAMPAIGN-CREATOR</Module></MustVerify>
+      <MustVerify><Module>M-API-CONTRACT</Module></MustVerify>
+      <MustPassCommand><Command>make gate-backend</Command></MustPassCommand>
+      <MustPassCommand><Command>make gate-frontend</Command></MustPassCommand>
+      <MustPassCommand><Command>make gate-openapi</Command></MustPassCommand>
+      <MustPassCommand><Command>make gate-compose</Command></MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-INFRA />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-CAMPAIGN-CREATOR />
+      </VerificationAnchors>
+      <ContextArtifact>requirements.xml</ContextArtifact>
+      <ContextArtifact>deployment.xml</ContextArtifact>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>apps/backend/app/core/config.py</File>
+      <File>apps/backend/app/services/campaign_creator.py</File>
+      <File>apps/backend/app/schemas/reference.py</File>
+      <File>apps/backend/app/api/routes/reference.py</File>
+      <File>contracts/openapi.json</File>
+      <File>apps/frontend/src/shared/api/schema.d.ts</File>
+      <File>apps/frontend/src/features/create-campaign/ui/CreateCampaignForm.tsx</File>
+      <File>apps/backend/.env.example</File>
+      <File>.env.example</File>
+      <File>docker-compose.yml</File>
+      <File>Makefile</File>
+      <File>README.md</File>
+      <File>AGENTS.md</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/main.xml</File>
+      <File>.grace/context/requirements.xml</File>
+      <File>.grace/context/deployment.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Backend prefix setting, creator prefixing and CreatorDefaults.campaign_name_prefix; regenerate contract and TS types.</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria><Criterion>gate-backend and gate-openapi exit 0; live POST /api/campaigns {name: campaign1} creates test_ponomaryov_campaign1.</Criterion></AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+          <Command>make gate-backend</Command>
+          <Command>make gate-openapi</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Show the prefix in the creator form.</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria><Criterion>gate-frontend exits 0; the form renders the prefix before the name input.</Criterion></AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+          <Command>make gate-frontend</Command>
+        </Verification>
+      </T-002>
+      <T-003>
+        <Title>Move env files to the repository root and update compose, Makefile, docs and GRACE paths.</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria><Criterion>gate-compose exits 0; docker compose stack and local backend start with the root .env.</Criterion></AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+          <Command>make gate-compose</Command>
+        </Verification>
+      </T-003>
+    </ImplementationPlan>
+  </C-CAMPAIGN-NAME-PREFIX-ROOT-ENV-20261118>
+</GraceChangePlan>

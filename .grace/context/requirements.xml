@@ -1,0 +1,24 @@
+<GraceRequirements graceVersion="4.0">
+  <ProjectName>Keitaro Campaign Tool</ProjectName>
+  <Annotation>Test assignment (Adrobot): a FastAPI + React tool over the Keitaro Admin API that creates campaigns with a geo-to-Google stream plus an offer stream, and edits offers (add / remove / shares) of existing campaigns.</Annotation>
+  <Keywords>keitaro, tracker, campaign, stream, offer, share, fastapi, sqlalchemy, react, fsd, grace</Keywords>
+  <Goals>
+    <Goal>Campaign creator: input campaign name, ISO country code and Keitaro offer id; create a campaign with configured domain, group and traffic source and exactly two streams - stream 1 catches the selected country and redirects to Google, stream 2 sends everyone else to the selected offer.</Goal>
+    <Goal>Offer editor for an existing campaign: list streams, add and remove offers in offer streams, show correct shares (active shares always sum to 100) and per-offer stats (clicks, conversions, CR, revenue, EPC, profit).</Goal>
+    <Goal>Keep a local PostgreSQL history of created campaigns and of every offer change applied to Keitaro.</Goal>
+  </Goals>
+  <Users>
+    <User>Media buyers / traffic managers working in Keitaro.</User>
+  </Users>
+  <Constraints>
+    <Constraint>Backend must be FastAPI + SQLAlchemy with Alembic migrations; frontend React + Vite + TanStack Query + Tailwind + shadcn/ui on Feature-Sliced Design.</Constraint>
+    <Constraint>Keitaro is the source of truth for campaigns, streams and offers; the local DB only stores history.</Constraint>
+    <Constraint>Keitaro API key lives only in the repository-root .env, never in tracked files or the browser.</Constraint>
+    <Constraint>Every change to the public HTTP API contract (contracts/openapi.json) goes through a GRACE change bundle.</Constraint>
+  </Constraints>
+  <Decisions>
+    <Decision>Editor share rule: adding or removing an offer rebalances all active offers of the stream equally (integer shares, first offers get the remainder, e.g. 34/33/33); manual share editing is allowed but active shares must sum to exactly 100; disabled offers have share 0.</Decision>
+    <Decision>Geo stream type is "forced" (intercepting) with a country accept filter and HTTP redirect; the offer stream is "regular" with schema "landings" and the chosen offer at 100%.</Decision>
+    <Decision>Every campaign created by the tool is named CAMPAIGN_NAME_PREFIX + input (configured test_ponomaryov_ for the shared test tracker); an input already carrying the prefix is not prefixed twice.</Decision>
+  </Decisions>
+</GraceRequirements>

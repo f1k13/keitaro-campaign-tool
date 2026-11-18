@@ -1,0 +1,25 @@
+<GraceGraphIndex graceVersion="4.0">
+  <GraphDocuments>
+    <GD-MAIN>
+      <Path>graph/main.xml</Path>
+      <Owns>
+        <M-BACKEND-CORE />
+        <M-DB />
+        <M-KEITARO-CLIENT />
+        <M-CAMPAIGN-CREATOR />
+        <M-OFFER-EDITOR />
+        <M-BACKEND-API />
+        <M-API-CONTRACT />
+        <M-FRONTEND-SHARED />
+        <M-FRONTEND-ENTITIES />
+        <M-FRONTEND-FEATURES />
+        <M-FRONTEND-WIDGETS />
+        <M-FRONTEND-PAGES />
+        <M-FRONTEND-APP />
+        <M-INFRA />
+        <DF-CREATE-CAMPAIGN />
+        <DF-EDIT-OFFERS />
+      </Owns>
+    </GD-MAIN>
+  </GraphDocuments>
+</GraceGraphIndex>

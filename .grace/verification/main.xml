@@ -1,0 +1,187 @@
+<GraceVerificationDocument graceVersion="4.0">
+  <!-- Tests are banned in this project: evidence is static gates (make gate-*), grace lint/status and recorded live scenarios. -->
+  <VD-MAIN>
+    <V-M-BACKEND-CORE>
+      <Priority>high</Priority>
+      <Commands>
+        <Command>make gate-backend</Command>
+      </Commands>
+      <Scenarios>
+        <Scenario>Missing KEITARO_API_KEY makes Settings() fail fast at startup.</Scenario>
+        <Scenario>AppError subclasses render JSON {detail, code} with 404/422/502.</Scenario>
+      </Scenarios>
+      <TraceAssertions>
+        <TraceAssertion>mypy strict passes for app/core.</TraceAssertion>
+      </TraceAssertions>
+    </V-M-BACKEND-CORE>
+    <V-M-DB>
+      <Priority>high</Priority>
+      <Commands>
+        <Command>make gate-backend</Command>
+        <Command>cd apps/backend &amp;&amp; uv run alembic upgrade head</Command>
+      </Commands>
+      <Scenarios>
+        <Scenario>alembic upgrade head on an empty database creates created_campaigns and offer_changes.</Scenario>
+      </Scenarios>
+      <TraceAssertions>
+        <TraceAssertion>Migration 0001_initial matches ORM models (manual review obligation; no autogenerate diff gate).</TraceAssertion>
+      </TraceAssertions>
+    </V-M-DB>
+    <V-M-KEITARO-CLIENT>
+      <Priority>high</Priority>
+      <Commands>
+        <Command>make gate-backend</Command>
+      </Commands>
+      <Scenarios>
+        <Scenario>GET /api/reference/offers against the configured tracker returns the offers visible to the API key.</Scenario>
+        <Scenario>Keitaro 4xx/5xx surfaces as HTTP 502 with the Keitaro error text; 404 surfaces as 404.</Scenario>
+      </Scenarios>
+      <TraceAssertions>
+        <TraceAssertion>Every Keitaro request logs failures with the [Keitaro][request][BLOCK_REQUEST] prefix.</TraceAssertion>
+      </TraceAssertions>
+    </V-M-KEITARO-CLIENT>
+    <V-M-CAMPAIGN-CREATOR>
+      <Priority>high</Priority>
+      <Commands>
+        <Command>make gate-backend</Command>
+      </Commands>
+      <Scenarios>
+        <Scenario>POST /api/campaigns {name, country: de, offer_id} creates a position campaign with the default domain/group/source, stream #1 forced + country accept DE + redirect https://www.google.com, stream #2 regular landings with the offer at share 100, and returns the campaign URL.</Scenario>
+        <Scenario>If stream creation fails the campaign is deleted in Keitaro and the error is returned.</Scenario>
+        <Scenario>With CAMPAIGN_NAME_PREFIX=test_ponomaryov_, name campaign1 becomes test_ponomaryov_campaign1 and test_ponomaryov_campaign1 stays unchanged.</Scenario>
+      </Scenarios>
+      <TraceAssertions>
+        <TraceAssertion>Live evidence 2026-11-18: campaign 214527 created with streams 1322714 (forced, country=DE, google) and 1322715 (landings, offer 18813 @ 100).</TraceAssertion>
+      </TraceAssertions>
+    </V-M-CAMPAIGN-CREATOR>
+    <V-M-OFFER-EDITOR>
+      <Priority>high</Priority>
+      <Commands>
+        <Command>make gate-backend</Command>
+      </Commands>
+      <Scenarios>
+        <Scenario>Adding offers one by one yields shares 100 -> 50/50 -> 34/33/33.</Scenario>
+        <Scenario>Removing an offer rebalances remaining active offers equally; disabled offers keep share 0.</Scenario>
+        <Scenario>PUT with active shares summing to 95 is rejected with 422 and nothing is sent to Keitaro.</Scenario>
+        <Scenario>Every successful mutation inserts one offer_changes row with before/after snapshots.</Scenario>
+      </Scenarios>
+      <TraceAssertions>
+        <TraceAssertion>split_equally(n) always sums to 100 for n greater than 0 (review obligation; tests are banned).</TraceAssertion>
+        <TraceAssertion>Live evidence 2026-11-18 on campaign 214527: add/add/update/remove sequence produced the expected shares in Keitaro.</TraceAssertion>
+      </TraceAssertions>
+    </V-M-OFFER-EDITOR>
+    <V-M-BACKEND-API>
+      <Priority>high</Priority>
+      <Commands>
+        <Command>make gate-backend</Command>
+        <Command>make gate-openapi</Command>
+      </Commands>
+      <Scenarios>
+        <Scenario>GET /api/health returns {status: ok}.</Scenario>
+        <Scenario>All routes declare response_model and operation_id so the contract is stable.</Scenario>
+      </Scenarios>
+      <TraceAssertions>
+        <TraceAssertion>Contract export matches committed contracts/openapi.json.</TraceAssertion>
+      </TraceAssertions>
+    </V-M-BACKEND-API>
+    <V-M-API-CONTRACT>
+      <Priority>high</Priority>
+      <Commands>
+        <Command>make gate-openapi</Command>
+      </Commands>
+      <Scenarios>
+        <Scenario>Changing a DTO or route without running make openapi fails gate-openapi.</Scenario>
+        <Scenario>schema.d.ts regenerated from contracts/openapi.json is byte-identical to the committed file.</Scenario>
+      </Scenarios>
+      <TraceAssertions>
+        <TraceAssertion>gate-openapi exits 0 on a clean tree.</TraceAssertion>
+      </TraceAssertions>
+    </V-M-API-CONTRACT>
+    <V-M-FRONTEND-SHARED>
+      <Priority>medium</Priority>
+      <Commands>
+        <Command>make gate-frontend</Command>
+      </Commands>
+      <Scenarios>
+        <Scenario>unwrap() throws ApiError with the backend detail text for non-2xx responses.</Scenario>
+      </Scenarios>
+      <TraceAssertions>
+        <TraceAssertion>tsc and steiger pass for src/shared.</TraceAssertion>
+      </TraceAssertions>
+    </V-M-FRONTEND-SHARED>
+    <V-M-FRONTEND-ENTITIES>
+      <Priority>medium</Priority>
+      <Commands>
+        <Command>make gate-frontend</Command>
+      </Commands>
+      <Scenarios>
+        <Scenario>Editor view and change log queries are keyed by campaign id and interval.</Scenario>
+      </Scenarios>
+      <TraceAssertions>
+        <TraceAssertion>steiger reports no FSD violations for src/entities.</TraceAssertion>
+      </TraceAssertions>
+    </V-M-FRONTEND-ENTITIES>
+    <V-M-FRONTEND-FEATURES>
+      <Priority>medium</Priority>
+      <Commands>
+        <Command>make gate-frontend</Command>
+      </Commands>
+      <Scenarios>
+        <Scenario>Add/remove/set-offers mutations invalidate the editor view and change log of the campaign.</Scenario>
+        <Scenario>Create form submits only when name, country, offer, domain, group and source are set.</Scenario>
+      </Scenarios>
+      <TraceAssertions>
+        <TraceAssertion>steiger reports no FSD violations for src/features.</TraceAssertion>
+      </TraceAssertions>
+    </V-M-FRONTEND-FEATURES>
+    <V-M-FRONTEND-WIDGETS>
+      <Priority>medium</Priority>
+      <Commands>
+        <Command>make gate-frontend</Command>
+      </Commands>
+      <Scenarios>
+        <Scenario>Stream card footer shows the active share sum; Save is disabled unless it equals 100.</Scenario>
+        <Scenario>Remove offer asks for confirmation in an in-app dialog.</Scenario>
+      </Scenarios>
+      <TraceAssertions>
+        <TraceAssertion>steiger reports no FSD violations for src/widgets.</TraceAssertion>
+      </TraceAssertions>
+    </V-M-FRONTEND-WIDGETS>
+    <V-M-FRONTEND-PAGES>
+      <Priority>medium</Priority>
+      <Commands>
+        <Command>make gate-frontend</Command>
+      </Commands>
+      <Scenarios>
+        <Scenario>/?page=editor&amp;campaign=ID opens the editor for that campaign; creator success links to it.</Scenario>
+      </Scenarios>
+      <TraceAssertions>
+        <TraceAssertion>Manual browser check 2026-11-18: editor rendered streams of campaign 214527 and adding offer 25327 via UI produced 50/50.</TraceAssertion>
+      </TraceAssertions>
+    </V-M-FRONTEND-PAGES>
+    <V-M-FRONTEND-APP>
+      <Priority>medium</Priority>
+      <Commands>
+        <Command>make gate-frontend</Command>
+      </Commands>
+      <Scenarios>
+        <Scenario>vite build produces dist/ served by nginx with /api proxied to backend.</Scenario>
+      </Scenarios>
+      <TraceAssertions>
+        <TraceAssertion>vite build exits 0.</TraceAssertion>
+      </TraceAssertions>
+    </V-M-FRONTEND-APP>
+    <V-M-INFRA>
+      <Priority>medium</Priority>
+      <Commands>
+        <Command>make gate-compose</Command>
+      </Commands>
+      <Scenarios>
+        <Scenario>make up starts db, backend (runs migrations) and frontend on :8080.</Scenario>
+      </Scenarios>
+      <TraceAssertions>
+        <TraceAssertion>docker compose config -q exits 0.</TraceAssertion>
+      </TraceAssertions>
+    </V-M-INFRA>
+  </VD-MAIN>
+</GraceVerificationDocument>

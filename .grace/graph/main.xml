@@ -1,0 +1,133 @@
+<GraceGraphDocument graceVersion="4.0">
+  <GD-MAIN>
+    <M-BACKEND-CORE>
+      <Summary>Settings from env (.env) and domain errors mapped to JSON HTTP responses.</Summary>
+      <Type>UTILITY</Type>
+      <Path>apps/backend/app/core/config.py</Path>
+      <Path>apps/backend/app/core/errors.py</Path>
+    </M-BACKEND-CORE>
+    <M-DB>
+      <Summary>SQLAlchemy async engine/session, ORM models created_campaigns and offer_changes, Alembic migrations.</Summary>
+      <Type>DATA_LAYER</Type>
+      <Path>apps/backend/app/db</Path>
+      <Path>apps/backend/app/models</Path>
+      <Path>apps/backend/alembic</Path>
+      <Path>apps/backend/alembic.ini</Path>
+      <M-BACKEND-CORE />
+    </M-DB>
+    <M-KEITARO-CLIENT>
+      <Summary>Async httpx client for Keitaro Admin API v1 (Api-Key header): campaigns, streams, offers, domains, groups, traffic sources, report/build.</Summary>
+      <Type>INTEGRATION</Type>
+      <Path>apps/backend/app/integrations</Path>
+      <M-BACKEND-CORE />
+    </M-KEITARO-CLIENT>
+    <M-CAMPAIGN-CREATOR>
+      <Summary>Creates a position campaign with domain/group/source, a forced geo stream (country accept filter, redirect to Google) and a regular landings stream with the offer at 100%; rolls back the campaign if stream creation fails; stores history.</Summary>
+      <Type>CORE_LOGIC</Type>
+      <Path>apps/backend/app/services/campaign_creator.py</Path>
+      <M-KEITARO-CLIENT />
+      <M-DB />
+    </M-CAMPAIGN-CREATOR>
+    <M-OFFER-EDITOR>
+      <Summary>Editor view (streams + offers + per-offer stats) and offer mutations: add/remove with equal rebalance, manual shares validated to sum 100 over active offers; audit log rows.</Summary>
+      <Type>CORE_LOGIC</Type>
+      <Path>apps/backend/app/services/offer_editor.py</Path>
+      <Path>apps/backend/app/services/shares.py</Path>
+      <M-KEITARO-CLIENT />
+      <M-DB />
+    </M-OFFER-EDITOR>
+    <M-BACKEND-API>
+      <Summary>FastAPI app and HTTP routes under /api plus request/response DTOs; the source of the API contract.</Summary>
+      <Type>ENTRY_POINT</Type>
+      <Path>apps/backend/app/main.py</Path>
+      <Path>apps/backend/app/api</Path>
+      <Path>apps/backend/app/schemas</Path>
+      <M-CAMPAIGN-CREATOR />
+      <M-OFFER-EDITOR />
+      <M-KEITARO-CLIENT />
+    </M-BACKEND-API>
+    <M-API-CONTRACT>
+      <Summary>Committed OpenAPI contract exported from M-BACKEND-API, its export script, and the generated frontend TypeScript types. Any change here requires a GRACE change bundle.</Summary>
+      <Type>UTILITY</Type>
+      <Path>contracts/openapi.json</Path>
+      <Path>apps/backend/scripts</Path>
+      <Path>apps/frontend/src/shared/api/schema.d.ts</Path>
+      <M-BACKEND-API />
+    </M-API-CONTRACT>
+    <M-FRONTEND-SHARED>
+      <Summary>FSD shared layer: typed API client (openapi-fetch), shadcn/ui primitives, formatting, share arithmetic mirror, URL state, country list.</Summary>
+      <Type>UTILITY</Type>
+      <Path>apps/frontend/src/shared</Path>
+      <M-API-CONTRACT />
+    </M-FRONTEND-SHARED>
+    <M-FRONTEND-ENTITIES>
+      <Summary>FSD entities: campaign (queries, state badge), offer (queries, stats cells), reference (domains/groups/sources/defaults), stream (meta).</Summary>
+      <Type>UI_COMPONENT</Type>
+      <Path>apps/frontend/src/entities</Path>
+      <M-FRONTEND-SHARED />
+    </M-FRONTEND-ENTITIES>
+    <M-FRONTEND-FEATURES>
+      <Summary>FSD features: create-campaign, select-campaign, select-interval, add-offer, remove-offer, edit-shares.</Summary>
+      <Type>UI_COMPONENT</Type>
+      <Path>apps/frontend/src/features</Path>
+      <M-FRONTEND-ENTITIES />
+      <M-FRONTEND-SHARED />
+    </M-FRONTEND-FEATURES>
+    <M-FRONTEND-WIDGETS>
+      <Summary>FSD widgets: stream-offers card, offer-changes-log, created-campaigns table, app-header.</Summary>
+      <Type>UI_COMPONENT</Type>
+      <Path>apps/frontend/src/widgets</Path>
+      <M-FRONTEND-FEATURES />
+      <M-FRONTEND-ENTITIES />
+    </M-FRONTEND-WIDGETS>
+    <M-FRONTEND-PAGES>
+      <Summary>FSD pages: create-campaign and offer-editor.</Summary>
+      <Type>UI_COMPONENT</Type>
+      <Path>apps/frontend/src/pages</Path>
+      <M-FRONTEND-WIDGETS />
+      <M-FRONTEND-FEATURES />
+    </M-FRONTEND-PAGES>
+    <M-FRONTEND-APP>
+      <Summary>FSD app layer and frontend tooling: root component, query provider, global styles, entrypoint, Vite/TS/steiger/shadcn config, Dockerfile and nginx.</Summary>
+      <Type>ENTRY_POINT</Type>
+      <Path>apps/frontend/src/app</Path>
+      <Path>apps/frontend/src/main.tsx</Path>
+      <Path>apps/frontend/index.html</Path>
+      <Path>apps/frontend/package.json</Path>
+      <Path>apps/frontend/vite.config.ts</Path>
+      <Path>apps/frontend/steiger.config.mjs</Path>
+      <Path>apps/frontend/components.json</Path>
+      <Path>apps/frontend/Dockerfile</Path>
+      <Path>apps/frontend/nginx.conf</Path>
+      <M-FRONTEND-PAGES />
+    </M-FRONTEND-APP>
+    <M-INFRA>
+      <Summary>docker-compose stack, root Makefile with run targets and verification gates, backend Dockerfile and project packaging, README.</Summary>
+      <Type>UTILITY</Type>
+      <Path>docker-compose.yml</Path>
+      <Path>Makefile</Path>
+      <Path>README.md</Path>
+      <Path>apps/backend/Dockerfile</Path>
+      <Path>apps/backend/pyproject.toml</Path>
+      <Path>.env.example</Path>
+      <M-BACKEND-API />
+      <M-FRONTEND-APP />
+    </M-INFRA>
+    <DF-CREATE-CAMPAIGN>
+      <Summary>Creator form -> POST /api/campaigns -> Keitaro POST /campaigns, POST /streams (geo), POST /streams (offer) -> created_campaigns row -> URL shown in UI.</Summary>
+      <M-FRONTEND-FEATURES />
+      <M-BACKEND-API />
+      <M-CAMPAIGN-CREATOR />
+      <M-KEITARO-CLIENT />
+      <M-DB />
+    </DF-CREATE-CAMPAIGN>
+    <DF-EDIT-OFFERS>
+      <Summary>Editor -> GET /api/campaigns/{id}/editor (streams + report/build stats) -> add/remove/set offers -> Keitaro PUT /streams/{id} -> offer_changes row -> view and log refetched.</Summary>
+      <M-FRONTEND-WIDGETS />
+      <M-BACKEND-API />
+      <M-OFFER-EDITOR />
+      <M-KEITARO-CLIENT />
+      <M-DB />
+    </DF-EDIT-OFFERS>
+  </GD-MAIN>
+</GraceGraphDocument>

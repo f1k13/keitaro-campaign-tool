@@ -1,0 +1,12 @@
+<GraceTechnology graceVersion="4.0">
+  <Language>Python 3.13 (backend), TypeScript 5.9 (frontend)</Language>
+  <Runtime>uvicorn (ASGI), browser via Vite 8 dev server or nginx in Docker</Runtime>
+  <Framework>FastAPI, SQLAlchemy 2 async + asyncpg, Alembic, pydantic-settings, httpx; React 19, TanStack Query 5, Tailwind CSS 4, shadcn/ui (radix), openapi-fetch + openapi-typescript</Framework>
+  <TestingStack>Tests are banned in this project (no unit, integration or e2e tests, no test frameworks). Evidence comes from static gates: make gate-backend (ruff + ruff format --check + mypy strict), make gate-frontend (oxlint + steiger FSD lint + tsc + vite build), make gate-openapi (API contract drift), make gate-compose (docker compose config), grace lint and grace status drift.</TestingStack>
+  <Observability>Python logging with [Module][function][BLOCK_*] prefixes for Keitaro calls, creator and editor mutations.</Observability>
+  <OperationalConstraints>
+    <Constraint>Package managers: uv for apps/backend, npm for apps/frontend.</Constraint>
+    <Constraint>Frontend follows Feature-Sliced Design: layers app, pages, widgets, features, entities, shared; imports only point downward; every slice exposes index.ts public API; enforced by steiger.</Constraint>
+    <Constraint>Frontend API types are generated from contracts/openapi.json; never hand-edit apps/frontend/src/shared/api/schema.d.ts.</Constraint>
+  </OperationalConstraints>
+</GraceTechnology>

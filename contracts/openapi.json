@@ -1,0 +1,1367 @@
+{
+  "components": {
+    "schemas": {
+      "AddOfferRequest": {
+        "properties": {
+          "offer_id": {
+            "exclusiveMinimum": 0.0,
+            "title": "Offer Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "offer_id"
+        ],
+        "title": "AddOfferRequest",
+        "type": "object"
+      },
+      "CampaignCreate": {
+        "properties": {
+          "country": {
+            "description": "ISO 3166-1 alpha-2 country code, e.g. US",
+            "title": "Country",
+            "type": "string"
+          },
+          "domain_id": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Domain Id"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "offer_id": {
+            "exclusiveMinimum": 0.0,
+            "title": "Offer Id",
+            "type": "integer"
+          },
+          "traffic_source_id": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Traffic Source Id"
+          }
+        },
+        "required": [
+          "name",
+          "country",
+          "offer_id"
+        ],
+        "title": "CampaignCreate",
+        "type": "object"
+      },
+      "CampaignCreated": {
+        "properties": {
+          "alias": {
+            "title": "Alias",
+            "type": "string"
+          },
+          "campaign_id": {
+            "title": "Campaign Id",
+            "type": "integer"
+          },
+          "country": {
+            "title": "Country",
+            "type": "string"
+          },
+          "domain_id": {
+            "title": "Domain Id",
+            "type": "integer"
+          },
+          "geo_stream_id": {
+            "title": "Geo Stream Id",
+            "type": "integer"
+          },
+          "group_id": {
+            "title": "Group Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "offer_id": {
+            "title": "Offer Id",
+            "type": "integer"
+          },
+          "offer_stream_id": {
+            "title": "Offer Stream Id",
+            "type": "integer"
+          },
+          "traffic_source_id": {
+            "title": "Traffic Source Id",
+            "type": "integer"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          }
+        },
+        "required": [
+          "campaign_id",
+          "alias",
+          "name",
+          "url",
+          "country",
+          "offer_id",
+          "domain_id",
+          "group_id",
+          "traffic_source_id",
+          "geo_stream_id",
+          "offer_stream_id"
+        ],
+        "title": "CampaignCreated",
+        "type": "object"
+      },
+      "CampaignOut": {
+        "properties": {
+          "alias": {
+            "title": "Alias",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "created_here": {
+            "title": "Created Here",
+            "type": "boolean"
+          },
+          "domain": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Domain"
+          },
+          "group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "alias",
+          "state",
+          "group",
+          "domain",
+          "created_at",
+          "created_here"
+        ],
+        "title": "CampaignOut",
+        "type": "object"
+      },
+      "CreatedCampaignOut": {
+        "properties": {
+          "alias": {
+            "title": "Alias",
+            "type": "string"
+          },
+          "country": {
+            "title": "Country",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "keitaro_campaign_id": {
+            "title": "Keitaro Campaign Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "offer_id": {
+            "title": "Offer Id",
+            "type": "integer"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          }
+        },
+        "required": [
+          "keitaro_campaign_id",
+          "name",
+          "alias",
+          "country",
+          "offer_id",
+          "url",
+          "created_at"
+        ],
+        "title": "CreatedCampaignOut",
+        "type": "object"
+      },
+      "CreatorDefaults": {
+        "properties": {
+          "campaign_name_prefix": {
+            "title": "Campaign Name Prefix",
+            "type": "string"
+          },
+          "domain_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Domain Id"
+          },
+          "geo_redirect_url": {
+            "title": "Geo Redirect Url",
+            "type": "string"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "traffic_source_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Traffic Source Id"
+          }
+        },
+        "required": [
+          "domain_id",
+          "group_id",
+          "traffic_source_id",
+          "geo_redirect_url",
+          "campaign_name_prefix"
+        ],
+        "title": "CreatorDefaults",
+        "type": "object"
+      },
+      "DomainOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "is_ssl": {
+            "title": "Is Ssl",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "state",
+          "is_ssl"
+        ],
+        "title": "DomainOut",
+        "type": "object"
+      },
+      "EditorView": {
+        "properties": {
+          "alias": {
+            "title": "Alias",
+            "type": "string"
+          },
+          "campaign_id": {
+            "title": "Campaign Id",
+            "type": "integer"
+          },
+          "campaign_name": {
+            "title": "Campaign Name",
+            "type": "string"
+          },
+          "interval": {
+            "$ref": "#/components/schemas/StatsInterval"
+          },
+          "streams": {
+            "items": {
+              "$ref": "#/components/schemas/StreamView"
+            },
+            "title": "Streams",
+            "type": "array"
+          }
+        },
+        "required": [
+          "campaign_id",
+          "campaign_name",
+          "alias",
+          "interval",
+          "streams"
+        ],
+        "title": "EditorView",
+        "type": "object"
+      },
+      "GroupOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "GroupOut",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "OfferChangeOut": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "after": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "After",
+            "type": "array"
+          },
+          "before": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Before",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "offer_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offer Id"
+          },
+          "stream_id": {
+            "title": "Stream Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "stream_id",
+          "action",
+          "offer_id",
+          "before",
+          "after",
+          "created_at"
+        ],
+        "title": "OfferChangeOut",
+        "type": "object"
+      },
+      "OfferOut": {
+        "properties": {
+          "country": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Country",
+            "type": "array"
+          },
+          "group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "state"
+        ],
+        "title": "OfferOut",
+        "type": "object"
+      },
+      "OfferRow": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "offer_id": {
+            "title": "Offer Id",
+            "type": "integer"
+          },
+          "share": {
+            "title": "Share",
+            "type": "integer"
+          },
+          "state": {
+            "enum": [
+              "active",
+              "disabled"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/OfferStats"
+          }
+        },
+        "required": [
+          "offer_id",
+          "name",
+          "state",
+          "share",
+          "stats"
+        ],
+        "title": "OfferRow",
+        "type": "object"
+      },
+      "OfferShareIn": {
+        "properties": {
+          "offer_id": {
+            "exclusiveMinimum": 0.0,
+            "title": "Offer Id",
+            "type": "integer"
+          },
+          "share": {
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Share",
+            "type": "integer"
+          },
+          "state": {
+            "default": "active",
+            "enum": [
+              "active",
+              "disabled"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "offer_id",
+          "share"
+        ],
+        "title": "OfferShareIn",
+        "type": "object"
+      },
+      "OfferStats": {
+        "properties": {
+          "clicks": {
+            "default": 0,
+            "title": "Clicks",
+            "type": "integer"
+          },
+          "conversions": {
+            "default": 0,
+            "title": "Conversions",
+            "type": "integer"
+          },
+          "cr": {
+            "default": 0,
+            "description": "conversions / clicks * 100",
+            "title": "Cr",
+            "type": "number"
+          },
+          "epc": {
+            "default": 0,
+            "description": "revenue / clicks",
+            "title": "Epc",
+            "type": "number"
+          },
+          "profit": {
+            "default": 0,
+            "title": "Profit",
+            "type": "number"
+          },
+          "revenue": {
+            "default": 0,
+            "title": "Revenue",
+            "type": "number"
+          }
+        },
+        "title": "OfferStats",
+        "type": "object"
+      },
+      "SetOffersRequest": {
+        "properties": {
+          "offers": {
+            "items": {
+              "$ref": "#/components/schemas/OfferShareIn"
+            },
+            "title": "Offers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "offers"
+        ],
+        "title": "SetOffersRequest",
+        "type": "object"
+      },
+      "StatsInterval": {
+        "enum": [
+          "today",
+          "yesterday",
+          "7_days_ago",
+          "1_month_ago",
+          "all_time"
+        ],
+        "title": "StatsInterval",
+        "type": "string"
+      },
+      "StreamView": {
+        "properties": {
+          "accepts_offers": {
+            "title": "Accepts Offers",
+            "type": "boolean"
+          },
+          "action_payload": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action Payload"
+          },
+          "filters": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Filters",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "offers": {
+            "items": {
+              "$ref": "#/components/schemas/OfferRow"
+            },
+            "title": "Offers",
+            "type": "array"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "stream_schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Keitaro stream schema: redirect | landings | action",
+            "title": "Stream Schema"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/OfferStats"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "position",
+          "state",
+          "stream_schema",
+          "action_payload",
+          "filters",
+          "accepts_offers",
+          "offers",
+          "totals"
+        ],
+        "title": "StreamView",
+        "type": "object"
+      },
+      "TrafficSourceOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "state"
+        ],
+        "title": "TrafficSourceOut",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Keitaro Campaign Tool",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/campaigns": {
+      "get": {
+        "operationId": "listCampaigns",
+        "parameters": [
+          {
+            "description": "Substring of name, alias or id",
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Substring of name, alias or id",
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CampaignOut"
+                  },
+                  "title": "Response Listcampaigns",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Campaigns",
+        "tags": [
+          "campaigns"
+        ]
+      },
+      "post": {
+        "operationId": "createCampaign",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampaignCreated"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Campaign",
+        "tags": [
+          "campaigns"
+        ]
+      }
+    },
+    "/api/campaigns/created": {
+      "get": {
+        "operationId": "listCreatedCampaigns",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CreatedCampaignOut"
+                  },
+                  "title": "Response Listcreatedcampaigns",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Created",
+        "tags": [
+          "campaigns"
+        ]
+      }
+    },
+    "/api/campaigns/{campaign_id}/changes": {
+      "get": {
+        "operationId": "listOfferChanges",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OfferChangeOut"
+                  },
+                  "title": "Response Listofferchanges",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Changes",
+        "tags": [
+          "editor"
+        ]
+      }
+    },
+    "/api/campaigns/{campaign_id}/editor": {
+      "get": {
+        "operationId": "getEditorView",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/StatsInterval",
+              "default": "all_time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditorView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Editor",
+        "tags": [
+          "editor"
+        ]
+      }
+    },
+    "/api/campaigns/{campaign_id}/streams/{stream_id}/offers": {
+      "post": {
+        "operationId": "addStreamOffer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "stream_id",
+            "required": true,
+            "schema": {
+              "title": "Stream Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOfferRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Offer",
+        "tags": [
+          "editor"
+        ]
+      },
+      "put": {
+        "operationId": "setStreamOffers",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "stream_id",
+            "required": true,
+            "schema": {
+              "title": "Stream Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetOffersRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Offers",
+        "tags": [
+          "editor"
+        ]
+      }
+    },
+    "/api/campaigns/{campaign_id}/streams/{stream_id}/offers/{offer_id}": {
+      "delete": {
+        "operationId": "removeStreamOffer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "stream_id",
+            "required": true,
+            "schema": {
+              "title": "Stream Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "offer_id",
+            "required": true,
+            "schema": {
+              "title": "Offer Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Remove Offer",
+        "tags": [
+          "editor"
+        ]
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Health",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/reference/defaults": {
+      "get": {
+        "operationId": "getCreatorDefaults",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatorDefaults"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Defaults",
+        "tags": [
+          "reference"
+        ]
+      }
+    },
+    "/api/reference/domains": {
+      "get": {
+        "operationId": "listDomains",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DomainOut"
+                  },
+                  "title": "Response Listdomains",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Domains",
+        "tags": [
+          "reference"
+        ]
+      }
+    },
+    "/api/reference/groups": {
+      "get": {
+        "operationId": "listGroups",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GroupOut"
+                  },
+                  "title": "Response Listgroups",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Groups",
+        "tags": [
+          "reference"
+        ]
+      }
+    },
+    "/api/reference/offers": {
+      "get": {
+        "operationId": "listOffers",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OfferOut"
+                  },
+                  "title": "Response Listoffers",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Offers",
+        "tags": [
+          "reference"
+        ]
+      }
+    },
+    "/api/reference/traffic-sources": {
+      "get": {
+        "operationId": "listTrafficSources",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TrafficSourceOut"
+                  },
+                  "title": "Response Listtrafficsources",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Traffic Sources",
+        "tags": [
+          "reference"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+<GraceChangeSpec graceVersion="4.0" status="applied">
+  <C-CAMPAIGN-NAME-PREFIX-ROOT-ENV-20261118>
+    <Summary>Prefix every created campaign name with a configurable test_lastname_ prefix and move environment files to the repository root.</Summary>
+    <Problem>Campaigns in the shared test tracker must be named test_ponomaryov_*, e.g. test_ponomaryov_campaign1, and the env files live inside apps/backend instead of the repository root.</Problem>
+    <Goals>
+      <Goal>New setting CAMPAIGN_NAME_PREFIX (root .env: test_ponomaryov_); the creator prepends it to the requested name unless the name already starts with it.</Goal>
+      <Goal>API contract: CreatorDefaults gains campaign_name_prefix (string) so the UI can show the prefix next to the name field.</Goal>
+      <Goal>Env files move to the repository root (.env, .env.example); docker compose and local backend runs both read the root .env.</Goal>
+      <Goal>Existing tool-created campaign 214527 is renamed in Keitaro and in created_campaigns to the prefixed name.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Root .env stays gitignored; .env.example contains only placeholders.</Constraint>
+      <Constraint>Tests are banned; evidence is the static gates and a live creator run.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>No renaming of campaigns not created by this tool; no prefix enforcement in the offer editor.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>POST /api/campaigns {name: campaign1} creates a Keitaro campaign named test_ponomaryov_campaign1; a name already starting with the prefix is not doubled.</Criterion>
+      <Criterion>GET /api/reference/defaults returns campaign_name_prefix; the creator form shows it before the name input.</Criterion>
+      <Criterion>apps/backend/.env and apps/backend/.env.example no longer exist; make up and make backend work with the root .env.</Criterion>
+      <Criterion>gate-backend, gate-frontend, gate-openapi, gate-compose and grace lint exit 0.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-BACKEND-CORE />
+      <M-CAMPAIGN-CREATOR />
+      <M-BACKEND-API />
+      <M-API-CONTRACT />
+      <M-FRONTEND-FEATURES />
+      <M-INFRA />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>make gate</ExpectedCommand>
+      <ExpectedEvidence>Gate output, contract diff showing campaign_name_prefix, live creation of test_ponomaryov_* campaign.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>Requested by the user in chat on 2026-11-18 (prefix test_ponomaryov_, env files in root).</Assumption>
+    </Assumptions>
+  </C-CAMPAIGN-NAME-PREFIX-ROOT-ENV-20261118>
+</GraceChangeSpec>

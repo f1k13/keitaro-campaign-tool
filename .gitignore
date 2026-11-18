@@ -1,0 +1,19 @@
+# env / secrets
+.env
+!.env.example
+.claude/settings.local.json
+
+# python
+.venv/
+__pycache__/
+.mypy_cache/
+.ruff_cache/
+
+# node
+node_modules/
+dist/
+*.tsbuildinfo
+
+# misc
+.DS_Store
+.worktrees/

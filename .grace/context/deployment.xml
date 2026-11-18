@@ -1,0 +1,5 @@
+<GraceDeployment graceVersion="4.0">
+  <Applicability>applicable</Applicability>
+  <Target>Local docker compose: db (postgres:17, host port 5433), backend (FastAPI :8000, runs alembic upgrade head on start), frontend (nginx :8080 proxying /api to backend).</Target>
+  <Notes>All configuration lives in the repository-root .env (template .env.example), read by docker compose and by the backend when run locally. No production deployment; the deliverable is a GitHub repository with README instructions.</Notes>
+</GraceDeployment>

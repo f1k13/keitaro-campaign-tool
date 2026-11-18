@@ -1,0 +1,6 @@
+<GracePrinciples graceVersion="4.0">
+  <Principle>Contract-first changes: clarify scope and verification before implementation.</Principle>
+  <Principle>Keep semantic anchors stable and grep-friendly.</Principle>
+  <Principle>Use assertions, scopes, and static gates as fresh completion evidence; tests are banned.</Principle>
+  <Principle>Business rules (share arithmetic, stream layout) live in backend services, not in routes or the UI.</Principle>
+</GracePrinciples>
