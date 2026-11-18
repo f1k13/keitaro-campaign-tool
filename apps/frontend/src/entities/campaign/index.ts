@@ -1,3 +1,4 @@
+export { useInvalidateEditor } from './api/invalidate'
 export {
   campaignKeys,
   useCampaigns,

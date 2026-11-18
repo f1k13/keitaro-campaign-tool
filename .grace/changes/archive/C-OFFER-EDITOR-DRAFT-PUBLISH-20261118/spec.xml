@@ -1,4 +1,4 @@
-<GraceChangeSpec graceVersion="4.0" status="approved">
+<GraceChangeSpec graceVersion="4.0" status="applied">
   <C-OFFER-EDITOR-DRAFT-PUBLISH-20261118>
     <Summary>Rework the offer editor to match the reference video: a local wrapper of campaign streams with draft edits (add / remove / bring back / pin weight), equal share split among unpinned active offers, and explicit Push / Cancel publishing to Keitaro; Fetch Streams syncs the wrapper from Keitaro.</Summary>
     <Problem>The current editor writes every add/remove straight to Keitaro, deletes removed offers, offers manual share inputs and has no pinning. The reference editor (Adrobot video) keeps an unpublished draft per stream, greys out removed offers with share 0 and a bring-back action, pins weights, and only changes Keitaro on Push.</Problem>

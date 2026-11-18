@@ -53,7 +53,7 @@ export function AddOfferButton({
     setOpen(false)
     setQuery('')
     add.mutate(offerId, {
-      onSuccess: () => toast.success(`Оффер ${offerId} добавлен, доли пересчитаны поровну`),
+      onSuccess: () => toast.success(`Оффер ${offerId} добавлен в черновик`),
       onError: (e) => toast.error(e.message),
     })
   }

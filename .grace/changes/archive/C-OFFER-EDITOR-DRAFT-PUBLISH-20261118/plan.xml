@@ -1,4 +1,4 @@
-<GraceChangePlan graceVersion="4.0" status="approved">
+<GraceChangePlan graceVersion="4.0" status="applied">
   <C-OFFER-EDITOR-DRAFT-PUBLISH-20261118>
     <IntentSummary>Replace the write-through offer editor with a PostgreSQL wrapper of streams holding draft edits (add, remove, bring back, pin), pinned-aware equal share split, and explicit Push / Cancel / Fetch Streams against Keitaro; update API contract and FSD frontend accordingly.</IntentSummary>
     <BaselineAssertions>

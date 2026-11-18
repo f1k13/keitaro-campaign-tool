@@ -21,10 +21,10 @@
         <Command>cd apps/backend &amp;&amp; uv run alembic upgrade head</Command>
       </Commands>
       <Scenarios>
-        <Scenario>alembic upgrade head on an empty database creates created_campaigns and offer_changes.</Scenario>
+        <Scenario>alembic upgrade head on an empty database creates created_campaigns, offer_changes, streams and stream_offers (0001_initial, 0002_stream_wrapper, 0003_stream_text_columns).</Scenario>
       </Scenarios>
       <TraceAssertions>
-        <TraceAssertion>Migration 0001_initial matches ORM models (manual review obligation; no autogenerate diff gate).</TraceAssertion>
+        <TraceAssertion>Migrations 0001_initial, 0002_stream_wrapper and 0003_stream_text_columns match the ORM models (reviewed 2026-11-18; manual review obligation, no autogenerate diff gate).</TraceAssertion>
       </TraceAssertions>
     </V-M-DB>
     <V-M-KEITARO-CLIENT>
@@ -35,6 +35,9 @@
       <Scenarios>
         <Scenario>GET /api/reference/offers against the configured tracker returns the offers visible to the API key.</Scenario>
         <Scenario>Keitaro 4xx/5xx surfaces as HTTP 502 with the Keitaro error text; 404 surfaces as 404.</Scenario>
+        <Scenario>Cache invalidation lives in KeitaroClient.create_campaign / delete_campaign and bumps a per-key generation, so a list load that started before the invalidation is not stored.</Scenario>
+        <Scenario>Repeated GET /api/campaigns within the TTL is served from cache: live 2026-11-18 first call 4.0 s (Keitaro), next calls 2-4 ms; a campaign created by the tool appears immediately (cache invalidated).</Scenario>
+        <Scenario>GET /offers/{id}: 200 returns the offer, 403 (no read permission) returns None, 404 raises NotFoundError.</Scenario>
       </Scenarios>
       <TraceAssertions>
         <TraceAssertion>Every Keitaro request logs failures with the [Keitaro][request][BLOCK_REQUEST] prefix.</TraceAssertion>
@@ -60,14 +63,20 @@
         <Command>make gate-backend</Command>
       </Commands>
       <Scenarios>
-        <Scenario>Adding offers one by one yields shares 100 -> 50/50 -> 34/33/33.</Scenario>
-        <Scenario>Removing an offer rebalances remaining active offers equally; disabled offers keep share 0.</Scenario>
-        <Scenario>PUT with active shares summing to 95 is rejected with 422 and nothing is sent to Keitaro.</Scenario>
-        <Scenario>Every successful mutation inserts one offer_changes row with before/after snapshots.</Scenario>
+        <Scenario>Add offers in a draft: 100 -> 34/33/33, stream dirty, Keitaro unchanged until Push.</Scenario>
+        <Scenario>Add a 4th offer -> 25/25/25/25; Cancel restores 34/33/33 and deletes the draft-added offer from the wrapper.</Scenario>
+        <Scenario>Pin one offer at 25 and remove another -> pinned 25, the two unpinned active 38/37, removed offer grey with share 0; bring back -> 25/25/25/25.</Scenario>
+        <Scenario>Push sends only active offers; removed offers vanish from Keitaro but stay removed in the wrapper; one offer_changes row per push.</Scenario>
+        <Scenario>An offer deleted directly in Keitaro becomes removed after Fetch Streams; a pinned offer keeps its pin with the share Keitaro reports.</Scenario>
+        <Scenario>Push with active shares not summing to 100 (all pinned, sum 80), Push with zero active offers, and pinning above 100 in total are rejected with 422.</Scenario>
+        <Scenario>Draft edit, then an offer change made directly in Keitaro, then Push returns 409 conflict and Keitaro keeps the external change; Cancel + Fetch Streams + redo + Push succeeds (live 2026-11-18, campaign 214545 stream 1322770).</Scenario>
+        <Scenario>Draft actions, Push, Cancel and Fetch Streams are serialised by SELECT ... FOR UPDATE on the stream rows (populate_existing), so shares never mix two writers; the UI also disables row actions while Fetch Streams is running. Push holds the lock across its Keitaro calls (up to the HTTP timeout).</Scenario>
+        <Scenario>Fetch Streams stores arbitrarily long stream names and action payloads (Text columns, migration 0003) and clears a draft flag on streams whose schema is no longer landings; Cancel works for any schema.</Scenario>
       </Scenarios>
       <TraceAssertions>
-        <TraceAssertion>split_equally(n) always sums to 100 for n greater than 0 (review obligation; tests are banned).</TraceAssertion>
-        <TraceAssertion>Live evidence 2026-11-18 on campaign 214527: add/add/update/remove sequence produced the expected shares in Keitaro.</TraceAssertion>
+        <TraceAssertion>rebalance keeps pinned shares and splits 100 minus the pinned sum equally among unpinned active offers (review obligation; tests are banned).</TraceAssertion>
+        <TraceAssertion>Live evidence 2026-11-18 on campaign 214554 (test_ponomaryov_editor_check, stream 1322796): all scenarios above observed against Keitaro GET /streams/1322796.</TraceAssertion>
+        <TraceAssertion>Draft, push and cancel actions log with [Editor][action][BLOCK_REBALANCE|BLOCK_PUSH] prefixes.</TraceAssertion>
       </TraceAssertions>
     </V-M-OFFER-EDITOR>
     <V-M-BACKEND-API>
@@ -127,7 +136,7 @@
         <Command>make gate-frontend</Command>
       </Commands>
       <Scenarios>
-        <Scenario>Add/remove/set-offers mutations invalidate the editor view and change log of the campaign.</Scenario>
+        <Scenario>Fetch, add, remove, restore, pin, unpin, push and cancel mutations invalidate the editor view and push log of the campaign.</Scenario>
         <Scenario>Create form submits only when name, country, offer, domain, group and source are set.</Scenario>
       </Scenarios>
       <TraceAssertions>
@@ -140,8 +149,8 @@
         <Command>make gate-frontend</Command>
       </Commands>
       <Scenarios>
-        <Scenario>Stream card footer shows the active share sum; Save is disabled unless it equals 100.</Scenario>
-        <Scenario>Remove offer asks for confirmation in an in-app dialog.</Scenario>
+        <Scenario>A stream with an unpublished draft is yellow with a "Не опубликован" badge and Push / Cancel buttons; removed offers are grey with "Вернуть"; pinned shares show a pin icon.</Scenario>
+        <Scenario>Stream footer shows the active share sum in red with a hint when it is not 100.</Scenario>
       </Scenarios>
       <TraceAssertions>
         <TraceAssertion>steiger reports no FSD violations for src/widgets.</TraceAssertion>
@@ -156,7 +165,7 @@
         <Scenario>/?page=editor&amp;campaign=ID opens the editor for that campaign; creator success links to it.</Scenario>
       </Scenarios>
       <TraceAssertions>
-        <TraceAssertion>Manual browser check 2026-11-18: editor rendered streams of campaign 214527 and adding offer 25327 via UI produced 50/50.</TraceAssertion>
+        <TraceAssertion>Manual browser check 2026-11-18: editor of campaign 214554 rendered the yellow draft state, pin icon, removed offer with bring back and Push/Cancel.</TraceAssertion>
       </TraceAssertions>
     </V-M-FRONTEND-PAGES>
     <V-M-FRONTEND-APP>

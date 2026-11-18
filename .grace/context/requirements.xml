@@ -4,7 +4,7 @@
   <Keywords>keitaro, tracker, campaign, stream, offer, share, fastapi, sqlalchemy, react, fsd, grace</Keywords>
   <Goals>
     <Goal>Campaign creator: input campaign name, ISO country code and Keitaro offer id; create a campaign with configured domain, group and traffic source and exactly two streams - stream 1 catches the selected country and redirects to Google, stream 2 sends everyone else to the selected offer.</Goal>
-    <Goal>Offer editor for an existing campaign: list streams, add and remove offers in offer streams, show correct shares (active shares always sum to 100) and per-offer stats (clicks, conversions, CR, revenue, EPC, profit).</Goal>
+    <Goal>Offer editor for an existing campaign: fetch streams, draft add / remove / bring back / pin offers in offer streams, publish with Push or drop with Cancel, show correct shares and per-offer stats (clicks, conversions, CR, revenue, EPC, profit).</Goal>
     <Goal>Keep a local PostgreSQL history of created campaigns and of every offer change applied to Keitaro.</Goal>
   </Goals>
   <Users>
@@ -17,7 +17,7 @@
     <Constraint>Every change to the public HTTP API contract (contracts/openapi.json) goes through a GRACE change bundle.</Constraint>
   </Constraints>
   <Decisions>
-    <Decision>Editor share rule: adding or removing an offer rebalances all active offers of the stream equally (integer shares, first offers get the remainder, e.g. 34/33/33); manual share editing is allowed but active shares must sum to exactly 100; disabled offers have share 0.</Decision>
+    <Decision>Editor model (from the reference video): the tool keeps a local wrapper of each campaign's streams. Add / remove / bring back / pin are draft actions that mark the stream unpublished (yellow) and do not touch Keitaro; Push publishes the active offers, Cancel restores the last published state, Fetch Streams re-syncs from Keitaro. Share rule: pinned offers keep their share, 100 minus the pinned sum is split equally (integer, remainder to the first offers) among unpinned active offers, removed offers have 0 and stay visible with bring back. No manual share inputs except the pin value (default current share). Push is refused when no offer is active. Offers that are disabled in Keitaro are imported as removed and are therefore dropped from Keitaro on the next Push (bring back re-activates them).</Decision>
     <Decision>Geo stream type is "forced" (intercepting) with a country accept filter and HTTP redirect; the offer stream is "regular" with schema "landings" and the chosen offer at 100%.</Decision>
     <Decision>Every campaign created by the tool is named CAMPAIGN_NAME_PREFIX + input (configured test_ponomaryov_ for the shared test tracker); an input already carrying the prefix is not prefixed twice.</Decision>
   </Decisions>

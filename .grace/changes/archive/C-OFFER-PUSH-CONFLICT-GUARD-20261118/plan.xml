@@ -1,4 +1,4 @@
-<GraceChangePlan graceVersion="4.0" status="approved">
+<GraceChangePlan graceVersion="4.0" status="applied">
   <C-OFFER-PUSH-CONFLICT-GUARD-20261118>
     <IntentSummary>Add ConflictError (409) and a Keitaro-vs-snapshot comparison in push_stream; declare 409 on the push route.</IntentSummary>
     <BaselineAssertions>

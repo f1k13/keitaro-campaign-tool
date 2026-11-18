@@ -8,13 +8,13 @@
 # START_MODULE_MAP
 #   StatsInterval    - allowed Keitaro report intervals
 #   OfferStats       - clicks/conversions/revenue/profit plus CR and EPC
-#   OfferRow         - offer inside a stream with share and stats
-#   StreamView       - stream with offers and totals
-#   EditorView       - campaign + streams
-#   AddOfferRequest  - add one offer, shares rebalanced equally
-#   OfferShareIn     - manual share for one offer
-#   SetOffersRequest - manual shares, active sum must be 100
-#   OfferChangeOut   - audit log row
+#   OfferRow         - offer inside a stream: status, share, pin, draft flag, stats
+#   StreamView       - stream with offers, draft flag and totals
+#   EditorView       - campaign + wrapper streams
+#   ErrorOut         - error body {detail, code} of domain errors
+#   AddOfferRequest  - draft-add one offer by id
+#   PinOfferRequest  - draft-pin an offer share (null = current share)
+#   OfferChangeOut   - push audit log row
 # END_MODULE_MAP
 from datetime import datetime
 from enum import StrEnum
@@ -43,8 +43,10 @@ class OfferStats(BaseModel):
 class OfferRow(BaseModel):
     offer_id: int
     name: str
-    state: Literal["active", "disabled"]
+    status: Literal["active", "removed"]
     share: int
+    pinned: bool = Field(description="Share is fixed and kept through rebalances")
+    is_new: bool = Field(description="Added in the draft, not yet pushed to Keitaro")
     stats: OfferStats
 
 
@@ -58,6 +60,8 @@ class StreamView(BaseModel):
     action_payload: str | None
     filters: list[str]
     accepts_offers: bool
+    is_dirty: bool = Field(description="Has unpublished draft changes (shown yellow)")
+    published_at: datetime | None
     offers: list[OfferRow]
     totals: OfferStats
 
@@ -67,21 +71,23 @@ class EditorView(BaseModel):
     campaign_name: str
     alias: str
     interval: StatsInterval
+    fetched_at: datetime | None
     streams: list[StreamView]
+
+
+class ErrorOut(BaseModel):
+    detail: str
+    code: str
 
 
 class AddOfferRequest(BaseModel):
     offer_id: int = Field(gt=0)
 
 
-class OfferShareIn(BaseModel):
-    offer_id: int = Field(gt=0)
-    share: int = Field(ge=0, le=100)
-    state: Literal["active", "disabled"] = "active"
-
-
-class SetOffersRequest(BaseModel):
-    offers: list[OfferShareIn]
+class PinOfferRequest(BaseModel):
+    share: int | None = Field(
+        default=None, ge=0, le=100, description="Pinned share; null pins the current share"
+    )
 
 
 class OfferChangeOut(BaseModel):

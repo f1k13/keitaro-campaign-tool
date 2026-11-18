@@ -7,7 +7,7 @@
       <Path>apps/backend/app/core/errors.py</Path>
     </M-BACKEND-CORE>
     <M-DB>
-      <Summary>SQLAlchemy async engine/session, ORM models created_campaigns and offer_changes, Alembic migrations.</Summary>
+      <Summary>SQLAlchemy async engine/session, ORM models created_campaigns, offer_changes (push log), streams and stream_offers (editor wrapper with drafts), Alembic migrations 0001-0003.</Summary>
       <Type>DATA_LAYER</Type>
       <Path>apps/backend/app/db</Path>
       <Path>apps/backend/app/models</Path>
@@ -16,7 +16,7 @@
       <M-BACKEND-CORE />
     </M-DB>
     <M-KEITARO-CLIENT>
-      <Summary>Async httpx client for Keitaro Admin API v1 (Api-Key header): campaigns, streams, offers, domains, groups, traffic sources, report/build.</Summary>
+      <Summary>Async client for Keitaro Admin API v1 (Api-Key header) over one shared keep-alive httpx client opened in the app lifespan: campaigns, streams, offers, domains, groups, traffic sources, report/build. Campaign and offer lists are cached in-process for KEITARO_CACHE_TTL_SECONDS (default 60, invalidated on campaign create/delete); stream reads and reports are never cached.</Summary>
       <Type>INTEGRATION</Type>
       <Path>apps/backend/app/integrations</Path>
       <M-BACKEND-CORE />
@@ -29,7 +29,7 @@
       <M-DB />
     </M-CAMPAIGN-CREATOR>
     <M-OFFER-EDITOR>
-      <Summary>Editor view (streams + offers + per-offer stats) and offer mutations: add/remove with equal rebalance, manual shares validated to sum 100 over active offers; audit log rows.</Summary>
+      <Summary>Draft/publish editor over a local wrapper of Keitaro streams: Fetch Streams sync, draft add / remove (grey, share 0) / bring back / pin / unpin with pinned-aware equal split, Push (only active offers to Keitaro, at least one active, active sum must be 100, 409 if Keitaro changed since the last fetch/push) and Cancel (restore last published snapshot); push audit log; per-offer stats.</Summary>
       <Type>CORE_LOGIC</Type>
       <Path>apps/backend/app/services/offer_editor.py</Path>
       <Path>apps/backend/app/services/shares.py</Path>
@@ -67,14 +67,14 @@
       <M-FRONTEND-SHARED />
     </M-FRONTEND-ENTITIES>
     <M-FRONTEND-FEATURES>
-      <Summary>FSD features: create-campaign, select-campaign, select-interval, add-offer, remove-offer, edit-shares.</Summary>
+      <Summary>FSD features: create-campaign, select-campaign, select-interval, fetch-streams, add-offer, remove-offer, restore-offer, pin-offer, publish-stream.</Summary>
       <Type>UI_COMPONENT</Type>
       <Path>apps/frontend/src/features</Path>
       <M-FRONTEND-ENTITIES />
       <M-FRONTEND-SHARED />
     </M-FRONTEND-FEATURES>
     <M-FRONTEND-WIDGETS>
-      <Summary>FSD widgets: stream-offers card, offer-changes-log, created-campaigns table, app-header.</Summary>
+      <Summary>FSD widgets: stream-offers card (yellow draft state with Push/Cancel, pins, removed offers with bring back), offer-changes-log (push log), created-campaigns table, app-header.</Summary>
       <Type>UI_COMPONENT</Type>
       <Path>apps/frontend/src/widgets</Path>
       <M-FRONTEND-FEATURES />
@@ -122,7 +122,7 @@
       <M-DB />
     </DF-CREATE-CAMPAIGN>
     <DF-EDIT-OFFERS>
-      <Summary>Editor -> GET /api/campaigns/{id}/editor (streams + report/build stats) -> add/remove/set offers -> Keitaro PUT /streams/{id} -> offer_changes row -> view and log refetched.</Summary>
+      <Summary>Editor -> GET /api/campaigns/{id}/editor (wrapper streams, auto Fetch Streams on first open, report/build stats) -> draft actions edit streams/stream_offers only -> Push -> Keitaro PUT /streams/{id} -> wrapper re-synced + offer_changes row; Cancel restores the published snapshot; Fetch Streams marks offers deleted in Keitaro as removed.</Summary>
       <M-FRONTEND-WIDGETS />
       <M-BACKEND-API />
       <M-OFFER-EDITOR />

@@ -10,7 +10,7 @@
 // END_MODULE_MAP
 import { Badge } from '@/shared/ui/badge'
 
-const LABELS: Record<string, string> = { active: 'активна', disabled: 'выключена', deleted: 'удалена' }
+const LABELS: Record<string, string> = { active: 'активна', disabled: 'выключена', deleted: 'удалена', removed: 'removed' }
 
 export function StateBadge({ state }: { state: string }) {
   return <Badge variant={state === 'active' ? 'secondary' : 'outline'}>{LABELS[state] ?? state}</Badge>

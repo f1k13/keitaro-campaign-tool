@@ -364,6 +364,18 @@
             "title": "Campaign Name",
             "type": "string"
           },
+          "fetched_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fetched At"
+          },
           "interval": {
             "$ref": "#/components/schemas/StatsInterval"
           },
@@ -380,9 +392,28 @@
           "campaign_name",
           "alias",
           "interval",
+          "fetched_at",
           "streams"
         ],
         "title": "EditorView",
+        "type": "object"
+      },
+      "ErrorOut": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail",
+          "code"
+        ],
+        "title": "ErrorOut",
         "type": "object"
       },
       "GroupOut": {
@@ -519,6 +550,11 @@
       },
       "OfferRow": {
         "properties": {
+          "is_new": {
+            "description": "Added in the draft, not yet pushed to Keitaro",
+            "title": "Is New",
+            "type": "boolean"
+          },
           "name": {
             "title": "Name",
             "type": "string"
@@ -527,60 +563,37 @@
             "title": "Offer Id",
             "type": "integer"
           },
+          "pinned": {
+            "description": "Share is fixed and kept through rebalances",
+            "title": "Pinned",
+            "type": "boolean"
+          },
           "share": {
             "title": "Share",
             "type": "integer"
           },
-          "state": {
-            "enum": [
-              "active",
-              "disabled"
-            ],
-            "title": "State",
-            "type": "string"
-          },
           "stats": {
             "$ref": "#/components/schemas/OfferStats"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "removed"
+            ],
+            "title": "Status",
+            "type": "string"
           }
         },
         "required": [
           "offer_id",
           "name",
-          "state",
+          "status",
           "share",
+          "pinned",
+          "is_new",
           "stats"
         ],
         "title": "OfferRow",
-        "type": "object"
-      },
-      "OfferShareIn": {
-        "properties": {
-          "offer_id": {
-            "exclusiveMinimum": 0.0,
-            "title": "Offer Id",
-            "type": "integer"
-          },
-          "share": {
-            "maximum": 100.0,
-            "minimum": 0.0,
-            "title": "Share",
-            "type": "integer"
-          },
-          "state": {
-            "default": "active",
-            "enum": [
-              "active",
-              "disabled"
-            ],
-            "title": "State",
-            "type": "string"
-          }
-        },
-        "required": [
-          "offer_id",
-          "share"
-        ],
-        "title": "OfferShareIn",
         "type": "object"
       },
       "OfferStats": {
@@ -621,20 +634,24 @@
         "title": "OfferStats",
         "type": "object"
       },
-      "SetOffersRequest": {
+      "PinOfferRequest": {
         "properties": {
-          "offers": {
-            "items": {
-              "$ref": "#/components/schemas/OfferShareIn"
-            },
-            "title": "Offers",
-            "type": "array"
+          "share": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Pinned share; null pins the current share",
+            "title": "Share"
           }
         },
-        "required": [
-          "offers"
-        ],
-        "title": "SetOffersRequest",
+        "title": "PinOfferRequest",
         "type": "object"
       },
       "StatsInterval": {
@@ -676,6 +693,11 @@
             "title": "Id",
             "type": "integer"
           },
+          "is_dirty": {
+            "description": "Has unpublished draft changes (shown yellow)",
+            "title": "Is Dirty",
+            "type": "boolean"
+          },
           "name": {
             "anyOf": [
               {
@@ -697,6 +719,18 @@
           "position": {
             "title": "Position",
             "type": "integer"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
           },
           "state": {
             "title": "State",
@@ -732,6 +766,8 @@
           "action_payload",
           "filters",
           "accepts_offers",
+          "is_dirty",
+          "published_at",
           "offers",
           "totals"
         ],
@@ -1037,6 +1073,108 @@
         ]
       }
     },
+    "/api/campaigns/{campaign_id}/streams/fetch": {
+      "post": {
+        "operationId": "fetchStreams",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "interval",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/StatsInterval",
+              "default": "all_time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditorView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Fetch Streams",
+        "tags": [
+          "editor"
+        ]
+      }
+    },
+    "/api/campaigns/{campaign_id}/streams/{stream_id}/cancel": {
+      "post": {
+        "operationId": "cancelStream",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "stream_id",
+            "required": true,
+            "schema": {
+              "title": "Stream Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel Stream",
+        "tags": [
+          "editor"
+        ]
+      }
+    },
     "/api/campaigns/{campaign_id}/streams/{stream_id}/offers": {
       "post": {
         "operationId": "addStreamOffer",
@@ -1093,65 +1231,6 @@
           }
         },
         "summary": "Add Offer",
-        "tags": [
-          "editor"
-        ]
-      },
-      "put": {
-        "operationId": "setStreamOffers",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "campaign_id",
-            "required": true,
-            "schema": {
-              "title": "Campaign Id",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "path",
-            "name": "stream_id",
-            "required": true,
-            "schema": {
-              "title": "Stream Id",
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SetOffersRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/StreamView"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Set Offers",
         "tags": [
           "editor"
         ]
@@ -1212,6 +1291,275 @@
           }
         },
         "summary": "Remove Offer",
+        "tags": [
+          "editor"
+        ]
+      }
+    },
+    "/api/campaigns/{campaign_id}/streams/{stream_id}/offers/{offer_id}/pin": {
+      "delete": {
+        "operationId": "unpinStreamOffer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "stream_id",
+            "required": true,
+            "schema": {
+              "title": "Stream Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "offer_id",
+            "required": true,
+            "schema": {
+              "title": "Offer Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Unpin Offer",
+        "tags": [
+          "editor"
+        ]
+      },
+      "put": {
+        "operationId": "pinStreamOffer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "stream_id",
+            "required": true,
+            "schema": {
+              "title": "Stream Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "offer_id",
+            "required": true,
+            "schema": {
+              "title": "Offer Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PinOfferRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Pin Offer",
+        "tags": [
+          "editor"
+        ]
+      }
+    },
+    "/api/campaigns/{campaign_id}/streams/{stream_id}/offers/{offer_id}/restore": {
+      "post": {
+        "operationId": "restoreStreamOffer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "stream_id",
+            "required": true,
+            "schema": {
+              "title": "Stream Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "offer_id",
+            "required": true,
+            "schema": {
+              "title": "Offer Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Restore Offer",
+        "tags": [
+          "editor"
+        ]
+      }
+    },
+    "/api/campaigns/{campaign_id}/streams/{stream_id}/push": {
+      "post": {
+        "operationId": "pushStream",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "stream_id",
+            "required": true,
+            "schema": {
+              "title": "Stream Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Stream not found in the wrapper or in Keitaro"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Stream changed in Keitaro since the last fetch"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "Keitaro API error"
+          }
+        },
+        "summary": "Push Stream",
         "tags": [
           "editor"
         ]

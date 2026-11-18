@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     keitaro_base_url: str = Field(description="Tracker URL, e.g. https://tracker.example")
     keitaro_api_key: str
     keitaro_timeout_seconds: float = 30.0
+    keitaro_cache_ttl_seconds: float = Field(
+        default=60.0, description="TTL for cached campaign/offer lists; 0 disables"
+    )
 
     keitaro_default_domain_id: int | None = None
     keitaro_default_group_id: int | None = None

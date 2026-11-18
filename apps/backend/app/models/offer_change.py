@@ -1,5 +1,5 @@
 # START_MODULE_CONTRACT
-#   PURPOSE: Audit log of offer edits applied to Keitaro streams.
+#   PURPOSE: Audit log of offer sets pushed to Keitaro streams.
 #   SCOPE: offer_changes table mapping.
 #   DEPENDS: M-DB
 #   LINKS: M-DB, V-M-DB
@@ -24,7 +24,7 @@ class OfferChange(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     campaign_id: Mapped[int] = mapped_column(Integer, index=True)
     stream_id: Mapped[int] = mapped_column(Integer, index=True)
-    action: Mapped[str] = mapped_column(String(16))  # add | remove | update
+    action: Mapped[str] = mapped_column(String(16))  # push
     offer_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     before: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)
     after: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)

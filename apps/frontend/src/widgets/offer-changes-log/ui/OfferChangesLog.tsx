@@ -1,5 +1,5 @@
 // START_MODULE_CONTRACT
-//   PURPOSE: Audit log of offer edits for the selected campaign (from local PostgreSQL).
+//   PURPOSE: Push log of the selected campaign: Keitaro offers before -> after (from local PostgreSQL).
 //   SCOPE: Read-only table.
 //   DEPENDS: M-FRONTEND-ENTITIES, M-FRONTEND-SHARED
 //   LINKS: M-FRONTEND-WIDGETS, V-M-FRONTEND-WIDGETS
@@ -13,13 +13,13 @@ import { Badge } from '@/shared/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 
-const ACTIONS: Record<string, string> = { add: 'добавлен', remove: 'удалён', update: 'доли изменены' }
+const ACTIONS: Record<string, string> = { push: 'Push', add: 'добавлен', remove: 'удалён', update: 'доли изменены' }
 
 type Snapshot = { offer_id?: number; share?: number; state?: string }
 
 function render(list: Snapshot[]) {
   if (list.length === 0) return '—'
-  return list.map((o) => `#${o.offer_id}: ${o.state === 'active' ? `${o.share}%` : 'выкл.'}`).join(', ')
+  return list.map((o) => `#${o.offer_id}: ${o.share}%`).join(', ')
 }
 
 export function OfferChangesLog({ campaignId }: { campaignId: number }) {
@@ -28,7 +28,7 @@ export function OfferChangesLog({ campaignId }: { campaignId: number }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>История изменений</CardTitle>
+        <CardTitle>История публикаций</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>

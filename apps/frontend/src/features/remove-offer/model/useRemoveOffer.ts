@@ -1,5 +1,5 @@
 // START_MODULE_CONTRACT
-//   PURPOSE: Mutation removing an offer from a stream (backend rebalances remaining shares).
+//   PURPOSE: Draft mutation removing an offer (greyed out, share 0, can be brought back).
 //   SCOPE: DELETE /api/campaigns/{cid}/streams/{sid}/offers/{oid} + cache invalidation.
 //   DEPENDS: M-FRONTEND-ENTITIES, M-FRONTEND-SHARED
 //   LINKS: M-FRONTEND-FEATURES, V-M-FRONTEND-FEATURES
@@ -8,13 +8,13 @@
 // START_MODULE_MAP
 //   useRemoveOffer - TanStack mutation
 // END_MODULE_MAP
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 
-import { campaignKeys } from '@/entities/campaign'
+import { useInvalidateEditor } from '@/entities/campaign'
 import { api, unwrap } from '@/shared/api'
 
 export function useRemoveOffer(campaignId: number, streamId: number) {
-  const qc = useQueryClient()
+  const invalidate = useInvalidateEditor(campaignId)
   return useMutation({
     mutationFn: async (offerId: number) =>
       unwrap(
@@ -22,10 +22,6 @@ export function useRemoveOffer(campaignId: number, streamId: number) {
           params: { path: { campaign_id: campaignId, stream_id: streamId, offer_id: offerId } },
         }),
       ),
-    onSettled: () =>
-      Promise.all([
-        qc.invalidateQueries({ queryKey: campaignKeys.editorAll(campaignId) }),
-        qc.invalidateQueries({ queryKey: campaignKeys.changes(campaignId) }),
-      ]),
+    onSettled: invalidate,
   })
 }

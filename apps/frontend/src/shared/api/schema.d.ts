@@ -73,6 +73,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/campaigns/{campaign_id}/streams/fetch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Fetch Streams */
+        post: operations["fetchStreams"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/campaigns/{campaign_id}/streams/{stream_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel Stream */
+        post: operations["cancelStream"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/campaigns/{campaign_id}/streams/{stream_id}/offers": {
         parameters: {
             query?: never;
@@ -81,8 +115,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Set Offers */
-        put: operations["setStreamOffers"];
+        put?: never;
         /** Add Offer */
         post: operations["addStreamOffer"];
         delete?: never;
@@ -103,6 +136,58 @@ export interface paths {
         post?: never;
         /** Remove Offer */
         delete: operations["removeStreamOffer"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/campaigns/{campaign_id}/streams/{stream_id}/offers/{offer_id}/pin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Pin Offer */
+        put: operations["pinStreamOffer"];
+        post?: never;
+        /** Unpin Offer */
+        delete: operations["unpinStreamOffer"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/campaigns/{campaign_id}/streams/{stream_id}/offers/{offer_id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore Offer */
+        post: operations["restoreStreamOffer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/campaigns/{campaign_id}/streams/{stream_id}/push": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Push Stream */
+        post: operations["pushStream"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -333,9 +418,18 @@ export interface components {
             campaign_id: number;
             /** Campaign Name */
             campaign_name: string;
+            /** Fetched At */
+            fetched_at: string | null;
             interval: components["schemas"]["StatsInterval"];
             /** Streams */
             streams: components["schemas"]["StreamView"][];
+        };
+        /** ErrorOut */
+        ErrorOut: {
+            /** Code */
+            code: string;
+            /** Detail */
+            detail: string;
         };
         /** GroupOut */
         GroupOut: {
@@ -391,31 +485,28 @@ export interface components {
         };
         /** OfferRow */
         OfferRow: {
+            /**
+             * Is New
+             * @description Added in the draft, not yet pushed to Keitaro
+             */
+            is_new: boolean;
             /** Name */
             name: string;
             /** Offer Id */
             offer_id: number;
+            /**
+             * Pinned
+             * @description Share is fixed and kept through rebalances
+             */
+            pinned: boolean;
             /** Share */
             share: number;
-            /**
-             * State
-             * @enum {string}
-             */
-            state: "active" | "disabled";
             stats: components["schemas"]["OfferStats"];
-        };
-        /** OfferShareIn */
-        OfferShareIn: {
-            /** Offer Id */
-            offer_id: number;
-            /** Share */
-            share: number;
             /**
-             * State
-             * @default active
+             * Status
              * @enum {string}
              */
-            state: "active" | "disabled";
+            status: "active" | "removed";
         };
         /** OfferStats */
         OfferStats: {
@@ -452,10 +543,13 @@ export interface components {
              */
             revenue: number;
         };
-        /** SetOffersRequest */
-        SetOffersRequest: {
-            /** Offers */
-            offers: components["schemas"]["OfferShareIn"][];
+        /** PinOfferRequest */
+        PinOfferRequest: {
+            /**
+             * Share
+             * @description Pinned share; null pins the current share
+             */
+            share?: number | null;
         };
         /**
          * StatsInterval
@@ -472,12 +566,19 @@ export interface components {
             filters: string[];
             /** Id */
             id: number;
+            /**
+             * Is Dirty
+             * @description Has unpublished draft changes (shown yellow)
+             */
+            is_dirty: boolean;
             /** Name */
             name: string | null;
             /** Offers */
             offers: components["schemas"]["OfferRow"][];
             /** Position */
             position: number;
+            /** Published At */
+            published_at: string | null;
             /** State */
             state: string;
             /**
@@ -670,7 +771,40 @@ export interface operations {
             };
         };
     };
-    setStreamOffers: {
+    fetchStreams: {
+        parameters: {
+            query?: {
+                interval?: components["schemas"]["StatsInterval"];
+            };
+            header?: never;
+            path: {
+                campaign_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancelStream: {
         parameters: {
             query?: never;
             header?: never;
@@ -680,11 +814,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetOffersRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -771,6 +901,168 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pinStreamOffer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: number;
+                stream_id: number;
+                offer_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PinOfferRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreamView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unpinStreamOffer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: number;
+                stream_id: number;
+                offer_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreamView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    restoreStreamOffer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: number;
+                stream_id: number;
+                offer_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreamView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pushStream: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: number;
+                stream_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreamView"];
+                };
+            };
+            /** @description Stream not found in the wrapper or in Keitaro */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description Stream changed in Keitaro since the last fetch */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Keitaro API error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
                 };
             };
         };

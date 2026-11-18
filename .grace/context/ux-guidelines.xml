@@ -1,6 +1,6 @@
 <GraceUXGuidelines graceVersion="4.0">
   <Applicability>applicable</Applicability>
   <Audience>Media buyers working in Keitaro.</Audience>
-  <Guideline>Russian UI copy; shadcn/ui components; destructive actions (remove offer) require an in-app confirmation dialog; every mutation reports success or the backend error via toast.</Guideline>
+  <Guideline>Russian UI copy; shadcn/ui components; editor actions are drafts (no confirmation dialogs): the yellow unpublished state, Cancel and bring back are the safety net; Push and Cancel report success or the backend error via toast.</Guideline>
   <Guideline>Numbers must match Keitaro: shares shown as integers with the active sum in the stream footer, stats with ru-RU formatting.</Guideline>
 </GraceUXGuidelines>

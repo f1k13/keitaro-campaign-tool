@@ -9,6 +9,7 @@
 #   AppError - base error with HTTP status and machine-readable code
 #   NotFoundError - requested entity does not exist (404)
 #   ValidationFailedError - business validation failed (422)
+#   ConflictError - state changed elsewhere, operation refused (409)
 #   UpstreamError - Keitaro API failed or returned an error (502)
 #   register_error_handlers - installs JSON handlers on the FastAPI app
 # END_MODULE_MAP
@@ -33,6 +34,11 @@ class NotFoundError(AppError):
 class ValidationFailedError(AppError):
     status_code = 422
     code = "validation_failed"
+
+
+class ConflictError(AppError):
+    status_code = 409
+    code = "conflict"
 
 
 class UpstreamError(AppError):

@@ -1,4 +1,4 @@
-<GraceChangeSpec graceVersion="4.0" status="approved">
+<GraceChangeSpec graceVersion="4.0" status="applied">
   <C-KEITARO-CLIENT-POOL-CACHE-20261118>
     <Summary>Speed up Keitaro reads: one shared keep-alive httpx client for the app and a short TTL cache for the campaign and offer lists.</Summary>
     <Problem>GET /api/campaigns takes about 3 s because Keitaro returns all ~380 campaigns (about 235 KB, 3-5 s server time) on every search keystroke, and every request opens a new TLS connection.</Problem>

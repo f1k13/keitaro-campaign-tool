@@ -1,4 +1,4 @@
-<GraceChangeSpec graceVersion="4.0" status="approved">
+<GraceChangeSpec graceVersion="4.0" status="applied">
   <C-OFFER-PUSH-CONFLICT-GUARD-20261118>
     <Summary>Push refuses to overwrite a stream that was changed in Keitaro after the last Fetch Streams / Push (409 conflict).</Summary>
     <Problem>Review finding F3: Push replaces the Keitaro offer list unconditionally, so offers added or reweighted directly in Keitaro after our fetch are silently lost.</Problem>
