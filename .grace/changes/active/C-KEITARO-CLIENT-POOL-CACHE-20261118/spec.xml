@@ -1,0 +1,35 @@
+<GraceChangeSpec graceVersion="4.0" status="approved">
+  <C-KEITARO-CLIENT-POOL-CACHE-20261118>
+    <Summary>Speed up Keitaro reads: one shared keep-alive httpx client for the app and a short TTL cache for the campaign and offer lists.</Summary>
+    <Problem>GET /api/campaigns takes about 3 s because Keitaro returns all ~380 campaigns (about 235 KB, 3-5 s server time) on every search keystroke, and every request opens a new TLS connection.</Problem>
+    <Goals>
+      <Goal>One httpx.AsyncClient per process, created in the FastAPI lifespan and reused by get_keitaro_client (keep-alive, no per-request TLS handshake).</Goal>
+      <Goal>In-process TTL cache (KEITARO_CACHE_TTL_SECONDS, default 60) for list_campaigns and list_offers; the campaign cache is invalidated after the creator creates or rolls back a campaign.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>No API contract change; editor stream/offer reads (get_stream, list_streams, report/build) are never cached.</Constraint>
+      <Constraint>Tests are banned; evidence is gates plus measured latency before/after.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>No shared/distributed cache (Redis); no server-side pagination of Keitaro.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>Second and later GET /api/campaigns within the TTL answer in well under 100 ms; a newly created campaign appears in the list immediately.</Criterion>
+      <Criterion>make gate-backend, gate-openapi (unchanged contract) and grace lint exit 0.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-BACKEND-CORE />
+      <M-KEITARO-CLIENT />
+      <M-CAMPAIGN-CREATOR />
+      <M-BACKEND-API />
+      <M-INFRA />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>make gate-backend</ExpectedCommand>
+      <ExpectedEvidence>Gate output and curl timings of /api/campaigns before and after.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>Requested by the user in chat on 2026-11-18 ("кэш тоже делай"); a 60 s staleness for campaigns created outside this tool is acceptable.</Assumption>
+    </Assumptions>
+  </C-KEITARO-CLIENT-POOL-CACHE-20261118>
+</GraceChangeSpec>

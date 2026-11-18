@@ -1,0 +1,57 @@
+<GraceChangePlan graceVersion="4.0" status="approved">
+  <C-OFFER-PUSH-CONFLICT-GUARD-20261118>
+    <IntentSummary>Add ConflictError (409) and a Keitaro-vs-snapshot comparison in push_stream; declare 409 on the push route.</IntentSummary>
+    <BaselineAssertions>
+      <MustExist><Value>M-OFFER-EDITOR</Value></MustExist>
+      <MustExist><Value>apps/backend/app/core/errors.py</Value></MustExist>
+      <MustExist><Value>apps/backend/app/services/offer_editor.py</Value></MustExist>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustVerify><Module>M-OFFER-EDITOR</Module></MustVerify>
+      <MustVerify><Module>M-API-CONTRACT</Module></MustVerify>
+      <MustPassCommand><Command>make gate-backend</Command></MustPassCommand>
+      <MustPassCommand><Command>make gate-openapi</Command></MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-OFFER-EDITOR />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-OFFER-EDITOR />
+      </VerificationAnchors>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>apps/backend/app/core/errors.py</File>
+      <File>apps/backend/app/services/offer_editor.py</File>
+      <File>apps/backend/app/api/routes/editor.py</File>
+      <File>contracts/openapi.json</File>
+      <File>apps/frontend/src/shared/api/schema.d.ts</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/main.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>ConflictError + snapshot comparison in push_stream + 409 declared on the push route; regenerate contract.</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Live conflict scenario returns 409 without writing to Keitaro; make gate-backend and make gate-openapi exit 0. The comparison logic is a review obligation (tests are banned).</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+          <Command>make gate-backend</Command>
+          <Command>make gate-openapi</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Record the conflict guard in graph and verification.</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria><Criterion>V-M-OFFER-EDITOR lists the conflict scenario; grace lint reports 0 errors.</Criterion></AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+        </Verification>
+      </T-002>
+    </ImplementationPlan>
+  </C-OFFER-PUSH-CONFLICT-GUARD-20261118>
+</GraceChangePlan>

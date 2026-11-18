@@ -1,0 +1,33 @@
+<GraceChangeSpec graceVersion="4.0" status="approved">
+  <C-OFFER-PUSH-CONFLICT-GUARD-20261118>
+    <Summary>Push refuses to overwrite a stream that was changed in Keitaro after the last Fetch Streams / Push (409 conflict).</Summary>
+    <Problem>Review finding F3: Push replaces the Keitaro offer list unconditionally, so offers added or reweighted directly in Keitaro after our fetch are silently lost.</Problem>
+    <Goals>
+      <Goal>Before PUT, push_stream compares Keitaro's current offers (offer id, share, state) with the stream's published snapshot (offers with in_keitaro); any difference raises ConflictError (HTTP 409, code conflict) and nothing is written to Keitaro.</Goal>
+      <Goal>The 409 response is declared on the push endpoint in the API contract; the UI shows the message, which tells the user to press Cancel, then Fetch Streams, and redo the draft.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>No change to fetch/cancel semantics; tests are banned, evidence is gates plus a live conflict scenario.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>No automatic merge of Keitaro changes into a draft.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>Draft edit, then an offer change made directly in Keitaro, then Push returns 409 and Keitaro keeps the external change; Cancel + Fetch Streams + redo + Push succeeds.</Criterion>
+      <Criterion>Push without external changes still succeeds; make gate-backend, gate-frontend, gate-openapi and grace lint exit 0.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-BACKEND-CORE />
+      <M-OFFER-EDITOR />
+      <M-BACKEND-API />
+      <M-API-CONTRACT />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>make gate</ExpectedCommand>
+      <ExpectedEvidence>Gate output, contract diff with 409 on pushStream, live conflict scenario on a test_ponomaryov_* campaign.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>Requested by the user in chat on 2026-11-18 ("F3 вариант а").</Assumption>
+    </Assumptions>
+  </C-OFFER-PUSH-CONFLICT-GUARD-20261118>
+</GraceChangeSpec>

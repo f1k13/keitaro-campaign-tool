@@ -1,0 +1,58 @@
+<GraceChangePlan graceVersion="4.0" status="approved">
+  <C-KEITARO-CLIENT-POOL-CACHE-20261118>
+    <IntentSummary>Shared lifespan httpx client and TTL cache for list_campaigns / list_offers with invalidation on campaign creation.</IntentSummary>
+    <BaselineAssertions>
+      <MustExist><Value>M-KEITARO-CLIENT</Value></MustExist>
+      <MustExist><Value>apps/backend/app/integrations/keitaro/client.py</Value></MustExist>
+      <MustExist><Value>apps/backend/app/main.py</Value></MustExist>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustVerify><Module>M-KEITARO-CLIENT</Module></MustVerify>
+      <MustPassCommand><Command>make gate-backend</Command></MustPassCommand>
+      <MustPassCommand><Command>make gate-openapi</Command></MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-KEITARO-CLIENT />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-KEITARO-CLIENT />
+      </VerificationAnchors>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>apps/backend/app/core/config.py</File>
+      <File>apps/backend/app/integrations/keitaro/client.py</File>
+      <File>apps/backend/app/integrations/keitaro/cache.py</File>
+      <File>apps/backend/app/integrations/keitaro/__init__.py</File>
+      <File>apps/backend/app/services/campaign_creator.py</File>
+      <File>apps/backend/app/main.py</File>
+      <File>.env.example</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/main.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Lifespan httpx client, TTL cache module, cached list_campaigns / list_offers, invalidation in the creator, KEITARO_CACHE_TTL_SECONDS setting.</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>make gate-backend and make gate-openapi exit 0; measured /api/campaigns latency drops on repeated calls; cache correctness is a review obligation.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+          <Command>make gate-backend</Command>
+          <Command>make gate-openapi</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Record the shared client and cache in graph and verification.</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria><Criterion>V-M-KEITARO-CLIENT lists the cache scenarios; grace lint reports 0 errors.</Criterion></AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+        </Verification>
+      </T-002>
+    </ImplementationPlan>
+  </C-KEITARO-CLIENT-POOL-CACHE-20261118>
+</GraceChangePlan>
