@@ -10,7 +10,7 @@
 // END_MODULE_MAP
 import { useIsMutating } from '@tanstack/react-query'
 import { RefreshCw } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { FetchStreamsButton, fetchStreamsKey } from '@/features/fetch-streams'
 import { IntervalSelect } from '@/features/select-interval'
@@ -31,6 +31,10 @@ export function OfferEditorPage({
 }) {
   const [interval, setInterval] = useState<StatsInterval>('all_time')
   const view = useEditorView(campaignId, interval)
+  const offerNames = useMemo(
+    () => new Map(view.data?.streams.flatMap((s) => s.offers.map((o) => [o.offer_id, o.name] as const)) ?? []),
+    [view.data],
+  )
   // lock row actions while Fetch Streams rewrites the wrapper, not only while the view refetches
   const fetching = useIsMutating({ mutationKey: fetchStreamsKey(campaignId ?? 0) }) > 0
   const label = view.data ? `${view.data.campaign_id} · ${view.data.campaign_name}` : campaignId ? `#${campaignId}` : null
@@ -76,7 +80,7 @@ export function OfferEditorPage({
 
       {view.data && view.data.streams.length === 0 && <p className="text-muted-foreground">В кампании нет потоков.</p>}
 
-      {campaignId && <OfferChangesLog campaignId={campaignId} />}
+      {campaignId && <OfferChangesLog campaignId={campaignId} offerNames={offerNames} />}
     </div>
   )
 }

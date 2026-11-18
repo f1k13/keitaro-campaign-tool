@@ -6,7 +6,7 @@
 // END_MODULE_CONTRACT
 //
 // START_MODULE_MAP
-//   OfferChangesLog - before → after shares per change
+//   OfferChangesLog - before → after offers (names + shares) per push
 // END_MODULE_MAP
 import { useOfferChanges } from '@/entities/campaign'
 import { Badge } from '@/shared/ui/badge'
@@ -17,12 +17,31 @@ const ACTIONS: Record<string, string> = { push: 'Push', add: 'добавлен',
 
 type Snapshot = { offer_id?: number; share?: number; state?: string }
 
-function render(list: Snapshot[]) {
-  if (list.length === 0) return '—'
-  return list.map((o) => `#${o.offer_id}: ${o.share}%`).join(', ')
+function OfferList({ list, names }: { list: Snapshot[]; names: Map<number, string> }) {
+  if (list.length === 0) return <span>—</span>
+  return (
+    <ul className="grid gap-0.5">
+      {list.map((o) => {
+        const name = (o.offer_id !== undefined && names.get(o.offer_id)) || `Offer #${o.offer_id}`
+        return (
+          <li key={o.offer_id} className="flex gap-2" title={`ID ${o.offer_id}`}>
+            <span className="w-10 shrink-0 text-right tabular-nums">{o.share}%</span>
+            <span className="max-w-72 truncate">{name}</span>
+          </li>
+        )
+      })}
+    </ul>
+  )
 }
 
-export function OfferChangesLog({ campaignId }: { campaignId: number }) {
+export function OfferChangesLog({
+  campaignId,
+  offerNames = new Map(),
+}: {
+  campaignId: number
+  // offer id -> name, taken from the editor view (falls back to "Offer #id")
+  offerNames?: Map<number, string>
+}) {
   const changes = useOfferChanges(campaignId)
   if (!changes.data?.length) return null
   return (
@@ -52,8 +71,12 @@ export function OfferChangesLog({ campaignId }: { campaignId: number }) {
                     {c.offer_id ? ` #${c.offer_id}` : ''}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-xs text-muted-foreground">{render(c.before as Snapshot[])}</TableCell>
-                <TableCell className="text-xs">{render(c.after as Snapshot[])}</TableCell>
+                <TableCell className="align-top text-xs text-muted-foreground">
+                  <OfferList list={c.before as Snapshot[]} names={offerNames} />
+                </TableCell>
+                <TableCell className="align-top text-xs">
+                  <OfferList list={c.after as Snapshot[]} names={offerNames} />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
