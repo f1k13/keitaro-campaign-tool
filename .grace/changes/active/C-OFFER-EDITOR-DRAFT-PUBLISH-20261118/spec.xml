@@ -1,0 +1,55 @@
+<GraceChangeSpec graceVersion="4.0" status="approved">
+  <C-OFFER-EDITOR-DRAFT-PUBLISH-20261118>
+    <Summary>Rework the offer editor to match the reference video: a local wrapper of campaign streams with draft edits (add / remove / bring back / pin weight), equal share split among unpinned active offers, and explicit Push / Cancel publishing to Keitaro; Fetch Streams syncs the wrapper from Keitaro.</Summary>
+    <Problem>The current editor writes every add/remove straight to Keitaro, deletes removed offers, offers manual share inputs and has no pinning. The reference editor (Adrobot video) keeps an unpublished draft per stream, greys out removed offers with share 0 and a bring-back action, pins weights, and only changes Keitaro on Push.</Problem>
+    <Goals>
+      <Goal>Wrapper state in PostgreSQL: tables streams (Keitaro stream id, campaign id, meta, is_dirty, published snapshot) and stream_offers (offer id, name, status active|removed, share, pinned, in_keitaro) via Alembic migration 0002.</Goal>
+      <Goal>Fetch Streams (POST /api/campaigns/{id}/streams/fetch, also run automatically on first editor open) pulls all streams of the campaign: streams without offers are stored as plain streams (name, type, schema, filters shown read-only); offer streams sync offers; an offer that disappeared from Keitaro becomes removed (grey, share 0, bring back); a stream with an unpublished draft keeps its draft.</Goal>
+      <Goal>Draft actions on an offer stream never call Keitaro and mark the stream dirty (yellow, "not published"): add offer by ID (existing removed offer is brought back instead of duplicated), remove (status removed, share 0, unpinned), bring back (status active), pin weight (fixed share, value entered by the user, default = current share), unpin.</Goal>
+      <Goal>Share rule after every draft action: pinned active offers keep their share; 100 minus the pinned sum is split equally (integer, remainder to the first offers) among unpinned active offers; removed offers have 0; pinned sum above 100 is rejected with 422.</Goal>
+      <Goal>Push (POST .../streams/{sid}/push) sends only active offers with their shares to Keitaro PUT /streams/{id}, requires active shares to sum to 100, re-syncs the stream from Keitaro, stores a new published snapshot, clears dirty and writes an offer_changes row (before = previous Keitaro offers, after = new). Removed offers stay in the wrapper as removed with bring back.</Goal>
+      <Goal>Cancel (POST .../streams/{sid}/cancel) restores the stream to its last published snapshot: offers added in the draft are deleted from the wrapper (binding only), statuses, shares and pins are restored, dirty is cleared.</Goal>
+      <Goal>UI: Fetch Streams button; dirty streams highlighted yellow with "Не опубликован", Push and Cancel; removed offers grey with "Вернуть"; new draft offers marked "новый"; pin control with value input; no confirmation dialog on remove (draft + Cancel + bring back are the safety net); per-offer stats stay as before.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>API contract changes (new endpoints and EditorView/StreamView/OfferRow fields, removal of PUT .../offers manual shares) are regenerated into contracts/openapi.json and frontend types.</Constraint>
+      <Constraint>Keitaro is changed only by campaign creation and Push; all other editor actions are local.</Constraint>
+      <Constraint>Offer lookup: GET /offers/{id} returning 404 means the offer does not exist (422); a permission error is tolerated (the API key cannot read most offers) and the name falls back to the /offers list or "Offer #id".</Constraint>
+      <Constraint>Tests are banned; evidence is make gate-* plus a live scenario on the test tracker with campaigns named test_ponomaryov_*.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>No manual share inputs other than the pin value; no editing of filters, redirects or non-offer streams; no bulk editing across campaigns; no offer enable/disable separate from remove.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>Stream with 3 offers at 34/33/33: add a 4th -> 25/25/25/25, stream yellow, Keitaro still has 3 offers until Push.</Criterion>
+      <Criterion>Pin one offer at 25, remove another -> pinned stays 25, the 2 remaining unpinned active get 38/37, removed shows grey 0% with bring back; bring back -> 25 pinned + 25/25/25.</Criterion>
+      <Criterion>Cancel after draft edits restores the published state and deletes draft-added offers from the wrapper.</Criterion>
+      <Criterion>Push writes exactly the active offers and shares to Keitaro, removed offers vanish from Keitaro but stay removed in the wrapper, an offer_changes row is written, the stream turns white.</Criterion>
+      <Criterion>Fetch after an offer was deleted directly in Keitaro shows it as removed with bring back.</Criterion>
+      <Criterion>Push is rejected with 422 when active shares do not sum to 100 (e.g. all offers pinned with sum below 100).</Criterion>
+      <Criterion>make gate and grace lint --failOn errors exit 0.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-DB />
+      <M-KEITARO-CLIENT />
+      <M-OFFER-EDITOR />
+      <M-BACKEND-API />
+      <M-API-CONTRACT />
+      <M-FRONTEND-SHARED />
+      <M-FRONTEND-ENTITIES />
+      <M-FRONTEND-FEATURES />
+      <M-FRONTEND-WIDGETS />
+      <M-FRONTEND-PAGES />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>make gate</ExpectedCommand>
+      <ExpectedEvidence>Gate output, contract diff, live scenario on a test_ponomaryov_* campaign covering add, remove, pin, bring back, cancel, push and fetch-after-external-delete, checked against Keitaro GET /streams/{id}.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>Requirements come from the user's transcript of the reference video (timestamps 0:36-5:52) on 2026-11-18.</Assumption>
+      <Assumption>Pin value is entered by the user (default: current share); confirmed by the user on 2026-11-18.</Assumption>
+      <Assumption>Per-offer stats (clicks, conversions, CR, revenue, EPC, profit) remain although the video does not show them; they come from the existing ТЗ requirement "цифры верные"; confirmed by the user on 2026-11-18.</Assumption>
+      <Assumption>Adding an offer ID that is already in the stream as removed acts as bring back; adding one that is already active is rejected with 422.</Assumption>
+    </Assumptions>
+  </C-OFFER-EDITOR-DRAFT-PUBLISH-20261118>
+</GraceChangeSpec>

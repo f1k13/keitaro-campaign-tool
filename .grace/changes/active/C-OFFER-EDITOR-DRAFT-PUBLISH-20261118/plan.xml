@@ -1,0 +1,130 @@
+<GraceChangePlan graceVersion="4.0" status="approved">
+  <C-OFFER-EDITOR-DRAFT-PUBLISH-20261118>
+    <IntentSummary>Replace the write-through offer editor with a PostgreSQL wrapper of streams holding draft edits (add, remove, bring back, pin), pinned-aware equal share split, and explicit Push / Cancel / Fetch Streams against Keitaro; update API contract and FSD frontend accordingly.</IntentSummary>
+    <BaselineAssertions>
+      <MustExist><Value>M-OFFER-EDITOR</Value></MustExist>
+      <MustExist><Value>M-DB</Value></MustExist>
+      <MustExist><Value>M-API-CONTRACT</Value></MustExist>
+      <MustExist><Value>apps/backend/app/services/offer_editor.py</Value></MustExist>
+      <MustExist><Value>apps/backend/app/services/shares.py</Value></MustExist>
+      <MustExist><Value>apps/backend/alembic/versions/0001_initial.py</Value></MustExist>
+      <MustExist><Value>contracts/openapi.json</Value></MustExist>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustVerify><Module>M-DB</Module></MustVerify>
+      <MustVerify><Module>M-OFFER-EDITOR</Module></MustVerify>
+      <MustVerify><Module>M-API-CONTRACT</Module></MustVerify>
+      <MustVerify><Module>M-FRONTEND-WIDGETS</Module></MustVerify>
+      <MustPassCommand><Command>make gate-backend</Command></MustPassCommand>
+      <MustPassCommand><Command>make gate-frontend</Command></MustPassCommand>
+      <MustPassCommand><Command>make gate-openapi</Command></MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-DB />
+        <M-OFFER-EDITOR />
+        <M-FRONTEND-FEATURES />
+        <M-FRONTEND-WIDGETS />
+        <DF-EDIT-OFFERS />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-DB />
+        <V-M-OFFER-EDITOR />
+        <V-M-FRONTEND-FEATURES />
+        <V-M-FRONTEND-WIDGETS />
+      </VerificationAnchors>
+      <ContextArtifact>requirements.xml</ContextArtifact>
+      <ContextArtifact>ux-guidelines.xml</ContextArtifact>
+    </DurableScope>
+    <ObservedWriteScope>
+      <Glob>apps/backend/app/models/**</Glob>
+      <Glob>apps/backend/alembic/versions/**</Glob>
+      <Glob>apps/backend/app/integrations/keitaro/**</Glob>
+      <Glob>apps/backend/app/services/**</Glob>
+      <Glob>apps/backend/app/schemas/**</Glob>
+      <Glob>apps/backend/app/api/routes/**</Glob>
+      <Glob>apps/frontend/src/**</Glob>
+      <File>contracts/openapi.json</File>
+      <File>README.md</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/main.xml</File>
+      <File>.grace/context/requirements.xml</File>
+      <File>.grace/context/ux-guidelines.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>DB wrapper: Stream and StreamOffer ORM models and Alembic migration 0002.</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>streams (Keitaro stream id PK, campaign_id, meta, is_dirty, published_snapshot JSONB) and stream_offers (unique stream_id+offer_id, status, share, pinned, in_keitaro) exist after alembic upgrade head; downgrade drops them. Covered by make gate-backend (mypy) and a live alembic upgrade; schema parity with models is a review obligation.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+          <Command>make gate-backend</Command>
+          <Command>make migrate</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Keitaro client: get_offer lookup tolerant to permission errors.</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>get_offer returns the offer, None on permission denied, raises NotFoundError on 404. Covered by make gate-backend; live behaviour observed against the test tracker.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+          <Command>make gate-backend</Command>
+        </Verification>
+      </T-002>
+      <T-003>
+        <Title>Editor service: fetch sync, draft add/remove/restore/pin/unpin, pinned-aware rebalance, push, cancel, audit log.</Title>
+        <DependsOn>T-001, T-002</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Share rule and lifecycle from the spec hold; only fetch and push call Keitaro. Covered by make gate-backend; share arithmetic correctness is a review obligation recorded in V-M-OFFER-EDITOR and checked by the live scenario.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+          <Command>make gate-backend</Command>
+        </Verification>
+      </T-003>
+      <T-004>
+        <Title>API: editor routes and DTOs (fetch, add, remove, restore, pin, unpin, push, cancel; drop manual PUT shares), regenerate contract and TS types.</Title>
+        <DependsOn>T-003</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>contracts/openapi.json and schema.d.ts reflect the new endpoints and fields; make gate-openapi exits 0.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+          <Command>make gate-backend</Command>
+          <Command>make gate-openapi</Command>
+        </Verification>
+      </T-004>
+      <T-005>
+        <Title>Frontend FSD: features fetch-streams, add-offer, remove-offer (no dialog), restore-offer, pin-offer, publish-stream; drop edit-shares; stream card yellow draft state with Push/Cancel; editor page Fetch Streams.</Title>
+        <DependsOn>T-004</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>make gate-frontend exits 0 (oxlint, steiger FSD, tsc, vite build); UI behaviour matches spec acceptance criteria in a browser check.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+          <Command>make gate-frontend</Command>
+        </Verification>
+      </T-005>
+      <T-006>
+        <Title>Durable reconciliation: graph summaries, verification scenarios, requirements decision, UX guideline, README.</Title>
+        <DependsOn>T-003, T-005</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>.grace graph/verification/context describe the draft/publish editor; grace lint reports 0 errors.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+        </Verification>
+      </T-006>
+    </ImplementationPlan>
+  </C-OFFER-EDITOR-DRAFT-PUBLISH-20261118>
+</GraceChangePlan>
