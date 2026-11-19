@@ -1,4 +1,4 @@
-<GraceChangeSpec graceVersion="4.0" status="approved">
+<GraceChangeSpec graceVersion="4.0" status="applied">
   <C-FRONTEND-REACT-ROUTER-20261119>
     <Summary>Replace query-string navigation (?page=editor&amp;campaign=ID) with react-router-dom path routes.</Summary>
     <Problem>The app navigates with a hand-written useUrlParam hook, producing URLs like /?campaign=214554&amp;page=editor instead of readable paths.</Problem>

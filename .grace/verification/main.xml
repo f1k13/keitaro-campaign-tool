@@ -162,7 +162,8 @@
         <Command>make gate-frontend</Command>
       </Commands>
       <Scenarios>
-        <Scenario>/?page=editor&amp;campaign=ID opens the editor for that campaign; creator success links to it.</Scenario>
+        <Scenario>/campaigns/:campaignId opens the editor for that campaign (also as a direct link on the nginx build); / is the creator, /editor the editor without a campaign; creator success, the created-campaigns table and the campaign picker navigate to /campaigns/:campaignId; browser back/forward works.</Scenario>
+        <Scenario>Legacy /?page=editor&amp;campaign=ID redirects to /campaigns/ID (checked in the browser 2026-11-19).</Scenario>
       </Scenarios>
       <TraceAssertions>
         <TraceAssertion>Manual browser check 2026-11-18: editor of campaign 214554 rendered the yellow draft state, pin icon, removed offer with bring back and Push/Cancel.</TraceAssertion>

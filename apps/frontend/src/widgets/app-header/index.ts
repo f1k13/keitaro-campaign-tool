@@ -1,1 +1,1 @@
-export { AppHeader, type PageKey } from './ui/AppHeader'
+export { AppHeader } from './ui/AppHeader'

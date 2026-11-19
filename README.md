@@ -20,7 +20,7 @@
 | | |
 |---|---|
 | Backend | Python 3.13, FastAPI, SQLAlchemy 2 (async, asyncpg), Alembic, httpx, pydantic-settings, uv |
-| Frontend | React 19, Vite, TypeScript, TanStack Query, Tailwind CSS 4, shadcn/ui, Feature-Sliced Design, openapi-fetch |
+| Frontend | React 19, Vite, TypeScript, React Router, TanStack Query, Tailwind CSS 4, shadcn/ui, Feature-Sliced Design, openapi-fetch |
 | Инфра | PostgreSQL 17, Docker Compose, nginx |
 | Процесс | [GRACE 4](https://github.com/osovv/grace-marketplace): `.grace/`, skills в `.claude/skills` |
 
@@ -60,7 +60,7 @@ make up            # то же самое без make: docker compose up --build
 
 | Что | Адрес |
 |---|---|
-| UI | http://localhost:8080 |
+| UI | http://localhost:8080 (создание кампании), http://localhost:8080/campaigns/&lt;ID&gt; (редактор кампании) |
 | API и Swagger | http://localhost:8000/docs |
 | PostgreSQL | localhost:5433 (логин и пароль из `.env`) |
 

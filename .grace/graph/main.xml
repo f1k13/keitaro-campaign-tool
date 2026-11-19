@@ -88,7 +88,7 @@
       <M-FRONTEND-FEATURES />
     </M-FRONTEND-PAGES>
     <M-FRONTEND-APP>
-      <Summary>FSD app layer and frontend tooling: root component, query provider, global styles, entrypoint, Vite/TS/steiger/shadcn config, Dockerfile and nginx.</Summary>
+      <Summary>FSD app layer and frontend tooling: root component, react-router-dom routes (/ creator, /editor, /campaigns/:campaignId, legacy ?page= redirect), query provider, global styles, entrypoint, Vite/TS/steiger/shadcn config, Dockerfile and nginx (SPA fallback to index.html).</Summary>
       <Type>ENTRY_POINT</Type>
       <Path>apps/frontend/src/app</Path>
       <Path>apps/frontend/src/main.tsx</Path>
