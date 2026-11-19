@@ -1,0 +1,60 @@
+<GraceChangePlan graceVersion="4.0" status="approved">
+  <C-FRONTEND-REACT-ROUTER-20261119>
+    <IntentSummary>Install react-router-dom, define routes in the app layer, switch header and page callbacks to router navigation, drop useUrlParam.</IntentSummary>
+    <BaselineAssertions>
+      <MustExist><Value>M-FRONTEND-APP</Value></MustExist>
+      <MustExist><Value>apps/frontend/src/app/App.tsx</Value></MustExist>
+      <MustExist><Value>apps/frontend/src/widgets/app-header/ui/AppHeader.tsx</Value></MustExist>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustVerify><Module>M-FRONTEND-APP</Module></MustVerify>
+      <MustVerify><Module>M-FRONTEND-PAGES</Module></MustVerify>
+      <MustPassCommand><Command>make gate-frontend</Command></MustPassCommand>
+      <MustPassCommand><Command>make gate-compose</Command></MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-FRONTEND-APP />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-FRONTEND-APP />
+        <V-M-FRONTEND-PAGES />
+      </VerificationAnchors>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>apps/frontend/package.json</File>
+      <File>apps/frontend/package-lock.json</File>
+      <Glob>apps/frontend/src/app/**</Glob>
+      <File>apps/frontend/src/main.tsx</File>
+      <File>apps/frontend/src/shared/lib/url-state.ts</File>
+      <Glob>apps/frontend/src/widgets/app-header/**</Glob>
+      <Glob>apps/frontend/src/pages/**</Glob>
+      <File>README.md</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/main.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Install react-router-dom; routes and legacy redirect in app layer; NavLink header; navigation callbacks; remove url-state.</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>make gate-frontend exits 0 (oxlint, steiger FSD, tsc, vite build); routes behave as in the spec in a browser check (no gate can machine-check navigation; review obligation).</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+          <Command>make gate-frontend</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Record routes in graph, verification and README.</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria><Criterion>V-M-FRONTEND-PAGES describes the new URLs; grace lint reports 0 errors.</Criterion></AcceptanceCriteria>
+        <Verification>
+          <Command>grace lint --path . --failOn errors</Command>
+          <Command>grace status --path . --json | jq -e '.observedDrift.unexplainedFiles | length == 0'</Command>
+        </Verification>
+      </T-002>
+    </ImplementationPlan>
+  </C-FRONTEND-REACT-ROUTER-20261119>
+</GraceChangePlan>

@@ -1,0 +1,37 @@
+<GraceChangeSpec graceVersion="4.0" status="approved">
+  <C-FRONTEND-REACT-ROUTER-20261119>
+    <Summary>Replace query-string navigation (?page=editor&amp;campaign=ID) with react-router-dom path routes.</Summary>
+    <Problem>The app navigates with a hand-written useUrlParam hook, producing URLs like /?campaign=214554&amp;page=editor instead of readable paths.</Problem>
+    <Goals>
+      <Goal>Routes: / (campaign creator), /editor (editor without a campaign), /campaigns/:campaignId (editor of one campaign); unknown paths redirect to /.</Goal>
+      <Goal>Header navigation uses NavLink; "Открыть в редакторе", the created-campaigns table and the editor campaign picker navigate to /campaigns/:campaignId.</Goal>
+      <Goal>Legacy links /?page=editor&amp;campaign=ID and /?page=editor|create redirect to the new paths.</Goal>
+      <Goal>The hand-written shared/lib/url-state.ts is removed; routing lives in the FSD app layer, pages stay router-agnostic (props in, callbacks out).</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>No backend or API contract change; nginx and Vite already fall back to index.html for any path.</Constraint>
+      <Constraint>Tests are banned; evidence is make gate-frontend, gate-compose and a browser check.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>No data loaders/actions, no lazy route splitting, no change to page content.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>Opening /campaigns/214554 directly (also on the nginx build at :8080) shows that campaign in the editor; browser back/forward works between pages.</Criterion>
+      <Criterion>/?page=editor&amp;campaign=214554 redirects to /campaigns/214554.</Criterion>
+      <Criterion>make gate-frontend and grace lint exit 0.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-FRONTEND-APP />
+      <M-FRONTEND-SHARED />
+      <M-FRONTEND-WIDGETS />
+      <M-FRONTEND-PAGES />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>make gate-frontend</ExpectedCommand>
+      <ExpectedEvidence>Gate output and browser navigation check on the Vite dev server and the nginx build.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>Requested by the user in chat on 2026-11-19 ("подключи React Router Dom").</Assumption>
+    </Assumptions>
+  </C-FRONTEND-REACT-ROUTER-20261119>
+</GraceChangeSpec>
